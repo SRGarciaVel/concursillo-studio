@@ -1,0 +1,21 @@
+﻿# Rust / Tauri
+src-tauri/target/
+Cargo.lock
+
+# Node / Vite
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Entorno
+.env
+.env.*
+!.env.example
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Datos locales
+data/local/

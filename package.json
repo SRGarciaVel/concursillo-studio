@@ -1,0 +1,14 @@
+﻿{
+  "name": "concursillo-studio",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm -r dev",
+    "dev:tauri": "cd src-tauri && cargo tauri dev",
+    "build:tauri": "cd src-tauri && cargo tauri build",
+    "gen:types": "cd src-tauri && cargo test export_bindings"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}
