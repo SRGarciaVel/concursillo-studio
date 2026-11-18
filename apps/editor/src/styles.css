@@ -78,3 +78,36 @@ select:disabled { opacity: 0.5; }
 .q-actions code { margin-right: auto; align-self: center; font-size: 0.8rem; }
 .hint.warn { color: var(--bad); }
 code { font-family: ui-monospace, monospace; }
+
+/* Importador masivo */
+.bulk-import { display: grid; gap: 10px; }
+.bulk-import summary { cursor: pointer; list-style: none; }
+.bulk-import summary h2 { display: inline; margin: 0; }
+.bulk-import summary::before { content: "▸ "; color: var(--muted); }
+.bulk-import[open] summary::before { content: "▾ "; }
+.bulk-import textarea { font-family: ui-monospace, monospace; font-size: 0.85rem; width: 100%; box-sizing: border-box; }
+.bulk-errors ul { margin: 6px 0 0; padding-left: 20px; font-family: ui-monospace, monospace; font-size: 0.85rem; }
+
+/* Sonidos */
+.sound-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.sound-row {
+  display: grid; grid-template-columns: 1fr 260px auto; gap: 14px; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+}
+@media (max-width: 800px) { .sound-row { grid-template-columns: 1fr; } }
+.sound-row audio { width: 100%; height: 34px; }
+.sound-actions { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; }
+.badge {
+  margin-left: 8px; padding: 1px 8px; border-radius: 999px; font-size: 0.7rem; font-weight: 700;
+  background: color-mix(in srgb, var(--accent) 30%, transparent); color: var(--text); vertical-align: middle;
+}
+.is-busy-row { opacity: 0.6; }
+
+/* Botón ocupado: spinner a la izquierda. */
+button.is-busy { position: relative; padding-left: 34px; }
+button.is-busy::before {
+  content: ""; position: absolute; left: 12px; top: 50%; width: 12px; height: 12px; margin-top: -8px;
+  border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

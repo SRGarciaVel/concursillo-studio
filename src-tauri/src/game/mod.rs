@@ -115,6 +115,8 @@ pub struct GameState {
     #[serde(skip)]
     #[ts(skip)]
     pub(crate) question_time: u32,
+    /// Sube cada vez que se cambia un sonido: el stage recarga los audios.
+    pub sounds_version: u32,
     /// Milisegundos acumulados desde el último segundo descontado.
     #[serde(skip)]
     #[ts(skip)]
@@ -152,6 +154,7 @@ impl GameState {
             chat_votes: None,
             chat_voters: Default::default(),
             question_time: DEFAULT_TIME_PER_QUESTION,
+            sounds_version: 0,
             tick_accum_ms: 0,
         }
     }
@@ -229,15 +232,16 @@ impl GameState {
     }
 
     /// Partida nueva desde cero, conservando lo que no es de la partida:
-    /// el tema y la conexión a Twitch.
+    /// el tema, la conexión a Twitch, el tiempo por pregunta y la versión de sonidos.
     fn restart(&mut self, mode: GameMode, total_questions: usize) {
         let theme = std::mem::take(&mut self.theme);
         let twitch = std::mem::take(&mut self.twitch);
-        let question_time = self.question_time;
+        let (question_time, sounds_version) = (self.question_time, self.sounds_version);
         *self = Self::new(mode, total_questions);
         self.theme = theme;
         self.twitch = twitch;
         self.question_time = question_time;
+        self.sounds_version = sounds_version;
         // En Millonario el reloj en Idle ya enseña el tiempo configurado.
         self.time_limit = question_time;
         self.time_remaining = question_time;

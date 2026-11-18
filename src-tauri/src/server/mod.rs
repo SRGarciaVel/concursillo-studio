@@ -127,6 +127,25 @@ pub enum Sound {
     PlayPass,
 }
 
+impl Sound {
+    pub const ALL: [Sound; 5] = [Sound::PlayTension, Sound::PlayCorrect, Sound::PlayWrong, Sound::PlayWin, Sound::PlayPass];
+
+    /// Nombre del archivo sin extensión (igual que en JSON): `play_tension`, ...
+    pub fn file_stem(self) -> &'static str {
+        match self {
+            Sound::PlayTension => "play_tension",
+            Sound::PlayCorrect => "play_correct",
+            Sound::PlayWrong => "play_wrong",
+            Sound::PlayWin => "play_win",
+            Sound::PlayPass => "play_pass",
+        }
+    }
+
+    pub fn from_stem(stem: &str) -> Option<Sound> {
+        Sound::ALL.into_iter().find(|s| s.file_stem() == stem)
+    }
+}
+
 /// Mensajes que el servidor envía a los clientes.
 /// `{"type": "state", "payload": {...}}`, `{"type": "error", "payload": "..."}`
 /// o `{"type": "audio", "payload": {"sound": "play_tension"}}`.

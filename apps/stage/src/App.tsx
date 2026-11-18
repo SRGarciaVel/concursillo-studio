@@ -8,24 +8,29 @@ import { Timer } from "./Timer";
 
 const LETTERS = ["A", "B", "C", "D"];
 
-function useSoundPlayer() {
-  const ref = useRef<SoundPlayer | null>(null);
+/**
+ * Reproductor de efectos. Se vuelve a crear cuando cambia `sounds_version`
+ * (el streamer ha subido un sonido nuevo desde el editor): así el stage usa el
+ * archivo nuevo sin tener que recargar la Browser Source de OBS.
+ */
+function useSoundPlayer(ref: React.MutableRefObject<SoundPlayer | null>, version: number) {
   useEffect(() => {
-    const player = new SoundPlayer();
+    const player = new SoundPlayer(version);
     ref.current = player;
+    if (version > 0) console.info(`[audio] sonidos actualizados (versión ${version})`);
     return () => {
       player.dispose();
-      ref.current = null;
+      if (ref.current === player) ref.current = null;
     };
-  }, []);
-  return ref;
+  }, [ref, version]);
 }
 
 export default function App() {
-  const player = useSoundPlayer();
+  const player = useRef<SoundPlayer | null>(null);
   const { state } = useGameSocket({
     onAudio: (sound: Sound) => void player.current?.play(sound),
   });
+  useSoundPlayer(player, state?.sounds_version ?? 0);
 
   const themeId = state?.theme;
   useEffect(() => {

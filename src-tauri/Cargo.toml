@@ -23,6 +23,7 @@ ts-rs = "8.1.0"
 futures = "0.3"
 tower-http = { version = "0.6", features = ["cors", "fs"] }
 twitch-irc = "6.1.3"
+uuid = { version = "1", features = ["v4"] }
 
 [dev-dependencies]
 tokio = { version = "1.38", features = ["full", "test-util"] }

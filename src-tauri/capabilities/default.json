@@ -19,6 +19,12 @@
     "allow-list-questions-sets",
     "allow-save-preset",
     "allow-load-preset",
-    "allow-list-presets"
+    "allow-list-presets",
+    "allow-parse-bulk-questions",
+    "allow-bulk-template",
+    "allow-save-custom-sound",
+    "allow-reset-sound",
+    "allow-list-sounds",
+    "allow-open-editor"
   ]
 }

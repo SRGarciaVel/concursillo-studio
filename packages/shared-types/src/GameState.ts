@@ -74,4 +74,8 @@ twitch: TwitchInfo,
 /**
  * Recuento de votos del chat mientras el comodín del chat está activo.
  */
-chat_votes: ChatVotes | null, };
+chat_votes: ChatVotes | null, 
+/**
+ * Sube cada vez que se cambia un sonido: el stage recarga los audios.
+ */
+sounds_version: number, };

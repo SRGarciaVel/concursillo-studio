@@ -1,9 +1,11 @@
-﻿pub mod comodines;
+﻿pub mod bulk;
+pub mod comodines;
 pub mod files;
 pub mod game;
 pub mod presets;
 pub mod schemas;
 pub mod server;
+pub mod sounds;
 pub mod twitch;
 
 use std::sync::Arc;
@@ -13,7 +15,38 @@ use game::GameState;
 use presets::PresetsDir;
 use schemas::GameMode;
 use server::{stage::AssetLookup, AppState};
-use tauri::Manager;
+use sounds::{DefaultSoundsDir, SoundsDir};
+use tauri::{AppHandle, Manager, WindowEvent};
+
+/// Etiqueta de la ventana secundaria del editor.
+const EDITOR_LABEL: &str = "editor";
+
+/// Abre el editor, o lo trae al frente si ya está abierto.
+fn show_editor(app: &AppHandle) -> tauri::Result<()> {
+    if let Some(window) = app.get_webview_window(EDITOR_LABEL) {
+        window.unminimize()?;
+        window.show()?;
+        return window.set_focus();
+    }
+    // Vite en desarrollo, assets embebidos en producción.
+    #[cfg(debug_assertions)]
+    let url = tauri::WebviewUrl::External("http://localhost:4324".parse().unwrap());
+    #[cfg(not(debug_assertions))]
+    let url = tauri::WebviewUrl::App("editor/index.html".into());
+    tauri::WebviewWindowBuilder::new(app, EDITOR_LABEL, url)
+        .title("Concursillo Studio · Editor")
+        .inner_size(1100.0, 800.0)
+        .build()?;
+    Ok(())
+}
+
+/// Botón "Abrir editor" del panel de control.
+/// Tiene que ser `async`: en Windows, crear una ventana desde un comando
+/// síncrono bloquea WebView2 (la ventana se queda en `about:blank`).
+#[tauri::command]
+async fn open_editor(app: AppHandle) -> Result<(), String> {
+    show_editor(&app).map_err(|e| e.to_string())
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -28,14 +61,28 @@ pub fn run() {
             presets::save_preset,
             presets::load_preset,
             presets::list_presets,
+            bulk::parse_bulk_questions,
+            bulk::bulk_template,
+            sounds::save_custom_sound,
+            sounds::reset_sound,
+            sounds::list_sounds,
+            open_editor,
         ])
+        // El editor es secundario: cerrarlo no afecta a nada. Cerrar el panel
+        // de control (ventana principal) cierra la app entera, editor incluido.
+        .on_window_event(|window, event| {
+            if window.label() == "main" && matches!(event, WindowEvent::CloseRequested { .. }) {
+                window.app_handle().exit(0);
+            }
+        })
         .setup(move |app| {
             let data_dir = files::data_dir(app.path().app_data_dir().ok());
+            let resources = app.path().resource_dir().ok();
 
             // En release los datos viven en la carpeta del usuario: la primera vez
             // se copian los ejemplos (sets, presets, sonidos) que trae el instalador.
             #[cfg(not(debug_assertions))]
-            if let Ok(resources) = app.path().resource_dir() {
+            if let Some(resources) = &resources {
                 match files::seed_data(&resources.join("data"), &data_dir) {
                     Ok(n) if n > 0 => println!("[datos] {n} archivos de ejemplo copiados a {}", data_dir.display()),
                     Ok(_) => {}
@@ -45,32 +92,35 @@ pub fn run() {
 
             app.manage(QuestionsDir::resolve(&data_dir));
             app.manage(PresetsDir::resolve(&data_dir));
+            app.manage(SoundsDir(data_dir.join("sounds")));
+            // Originales empaquetados (también en desarrollo: target/<perfil>/data/sounds).
+            app.manage(DefaultSoundsDir(
+                resources.map(|r| r.join("data").join("sounds")).filter(|d| d.is_dir()),
+            ));
+            // Los comandos IPC (p. ej. sonidos) también avisan a los clientes por WS.
+            app.manage(app_state.clone());
 
             // El stage para OBS se sirve por HTTP desde los assets embebidos en el .exe.
-            let handle = app.handle().clone();
-            let stage_assets: AssetLookup = Arc::new(move |path: &str| {
-                handle.asset_resolver().get(path.to_string()).map(|a| (a.bytes, a.mime_type))
-            });
+            // En desarrollo NO: el resolver leería un dist/ viejo; /stage redirige a Vite.
+            let stage_assets: Option<AssetLookup> = if cfg!(debug_assertions) {
+                None
+            } else {
+                let handle = app.handle().clone();
+                Some(Arc::new(move |path: &str| {
+                    handle.asset_resolver().get(path.to_string()).map(|a| (a.bytes, a.mime_type))
+                }))
+            };
 
             // Runtime tokio de Tauri: no bloquea el hilo principal.
             let state = app_state.clone();
             let sounds_dir = data_dir.join("sounds");
             tauri::async_runtime::spawn(async move {
-                if let Err(e) = server::serve(state, sounds_dir, Some(stage_assets)).await {
+                if let Err(e) = server::serve(state, sounds_dir, stage_assets).await {
                     eprintln!("[server] error: {e}");
                 }
             });
 
-            // Ventana del editor: Vite en desarrollo, assets embebidos en producción.
-            #[cfg(debug_assertions)]
-            let editor_url = tauri::WebviewUrl::External("http://localhost:4324".parse().unwrap());
-            #[cfg(not(debug_assertions))]
-            let editor_url = tauri::WebviewUrl::App("editor/index.html".into());
-            tauri::WebviewWindowBuilder::new(app, "editor", editor_url)
-                .title("Concursillo Studio · Editor")
-                .inner_size(1100.0, 800.0)
-                .build()?;
-
+            show_editor(app.handle())?;
             Ok(())
         })
         .run(tauri::generate_context!())

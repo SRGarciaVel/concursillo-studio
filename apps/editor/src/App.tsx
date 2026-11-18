@@ -11,7 +11,9 @@ import {
   saveQuestionSet,
 } from "@concursillo/ui";
 import type { Difficulty, GameMode, Question } from "@concursillo/shared-types";
+import { BulkImport } from "./BulkImport";
 import { PresetsTab } from "./PresetsTab";
+import { SoundsTab } from "./SoundsTab";
 
 const LETTERS = ["A", "B", "C", "D"] as const;
 const DIFFICULTIES: Difficulty[] = ["Easy", "Medium", "Hard"];
@@ -48,7 +50,12 @@ type Notice = { kind: "ok" | "error"; text: string } | null;
 
 const letterIndex = (q: Question) => ROSCO_ALPHABET.indexOf((roscoLetterOf(q) ?? "") as never);
 
-type Tab = "questions" | "presets";
+type Tab = "questions" | "presets" | "sounds";
+const TABS: { id: Tab; label: string }[] = [
+  { id: "questions", label: "Preguntas" },
+  { id: "presets", label: "Presets" },
+  { id: "sounds", label: "Sonidos" },
+];
 
 export default function App() {
   const [tab, setTab] = useState<Tab>("questions");
@@ -57,17 +64,17 @@ export default function App() {
       <header className="editor-header">
         <h1>Concursillo · Editor</h1>
         <nav className="tabs" role="tablist">
-          <button role="tab" aria-selected={tab === "questions"} className={tab === "questions" ? "tab active" : "tab"} onClick={() => setTab("questions")}>
-            Preguntas
-          </button>
-          <button role="tab" aria-selected={tab === "presets"} className={tab === "presets" ? "tab active" : "tab"} onClick={() => setTab("presets")}>
-            Presets
-          </button>
+          {TABS.map((t) => (
+            <button key={t.id} role="tab" aria-selected={tab === t.id} className={tab === t.id ? "tab active" : "tab"} onClick={() => setTab(t.id)}>
+              {t.label}
+            </button>
+          ))}
         </nav>
       </header>
-      {/* Las dos pestañas siguen montadas para no perder lo que se está editando. */}
+      {/* Las pestañas siguen montadas para no perder lo que se está editando. */}
       <div hidden={tab !== "questions"}><QuestionsTab /></div>
       <div hidden={tab !== "presets"}><PresetsTab /></div>
+      <div hidden={tab !== "sounds"}><SoundsTab /></div>
     </main>
   );
 }
@@ -248,6 +255,14 @@ function QuestionsTab() {
           )}
         </section>
       )}
+
+      <BulkImport
+        mode={mode}
+        onImport={(imported) => {
+          setQuestions((qs) => [...qs, ...imported]);
+          setNotice({ kind: "ok", text: `Importadas ${imported.length} preguntas (${MODE_LABEL[mode]}). Revísalas y guarda el set.` });
+        }}
+      />
 
       <div className="columns">
         <form className="panel form" onSubmit={addQuestion}>

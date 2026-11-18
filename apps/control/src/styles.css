@@ -92,3 +92,42 @@ button.pass { background: var(--warn); color: #3a2c00; }
 .chat-votes-summary { display: inline-flex; gap: 10px; font-variant-numeric: tabular-nums; }
 .chat-votes-summary .leader { color: var(--ok); font-weight: 800; }
 .preset-info { width: 100%; margin: 0; font-size: 0.9rem; }
+
+/* ───────────── Game feel ───────────── */
+.header-actions { display: flex; align-items: center; gap: 10px; }
+button {
+  transition: transform 0.12s cubic-bezier(0.3, 1.6, 0.5, 1), box-shadow 0.15s, filter 0.15s, background 0.2s, opacity 0.2s;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+}
+button:not(:disabled):hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35); }
+/* Al pulsar: se hunde (y los grandes, un poco más). */
+button:not(:disabled):active { transform: translateY(1px) scale(0.96); box-shadow: 0 0 0 rgba(0, 0, 0, 0); filter: brightness(0.95); transition-duration: 0.05s; }
+button.big:not(:disabled):active { transform: translateY(2px) scale(0.93); }
+button:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 70%, white); outline-offset: 2px; }
+button:disabled { box-shadow: none; }
+
+/* Ocupado: spinner y sin clics repetidos. */
+button.is-busy { position: relative; padding-left: 34px; opacity: 0.85; cursor: progress; }
+button.is-busy::before {
+  content: ""; position: absolute; left: 12px; top: 50%; width: 12px; height: 12px; margin-top: -8px;
+  border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Twitch conectando: puntito girando en la etiqueta. */
+.status-connecting::before {
+  content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 6px; vertical-align: middle;
+  border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+
+/* Cada cambio de fase destella en el panel de estado. */
+.flash { animation: flash 0.7s ease-out; border-radius: 4px; }
+@keyframes flash {
+  from { background: color-mix(in srgb, var(--accent) 55%, transparent); }
+  to { background: transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button, .flash, button.is-busy::before, .status-connecting::before { animation: none !important; transition: none !important; }
+}

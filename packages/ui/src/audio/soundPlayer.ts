@@ -25,7 +25,12 @@ export class SoundPlayer {
   private readonly ready = new Map<Sound, Promise<HTMLAudioElement | null>>();
   private loop: HTMLAudioElement | null = null;
 
+  /**
+   * @param version `GameState.sounds_version`: va en la URL (`?v=N`) para que,
+   *   cuando el streamer cambia un sonido, el navegador no use el de la caché.
+   */
   constructor(
+    private readonly version: number = 0,
     private readonly baseUrl: string = DEFAULT_SOUNDS_URL,
     private readonly log: Logger = (m) => console.info(`[audio] ${m}`),
   ) {
@@ -46,7 +51,7 @@ export class SoundPlayer {
         // loadedmetadata basta para saber que el archivo existe y es decodificable.
         audio.addEventListener("loadedmetadata", () => resolve(audio), { once: true });
         audio.addEventListener("error", () => resolve(tryExt(i + 1)), { once: true });
-        audio.src = `${this.baseUrl}/${sound}.${EXTENSIONS[i]}`;
+        audio.src = `${this.baseUrl}/${sound}.${EXTENSIONS[i]}?v=${this.version}`;
       });
     return tryExt(0).then((audio) => {
       this.elements.set(sound, audio);

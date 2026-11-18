@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { errorMessage, listPresets, loadPreset, useGameSocket } from "@concursillo/ui";
+import { errorMessage, listPresets, loadPreset, openEditor, useGameSocket } from "@concursillo/ui";
 import { THEMES, getTheme } from "@concursillo/themes";
 import type { ClientCommand, PresetSummary } from "@concursillo/shared-types";
 import { ComodinesPanel } from "./ComodinesPanel";
@@ -50,13 +50,27 @@ export default function App() {
   }, []);
 
   /** Un único comando: el backend aplica modo, preguntas, tiempo, tema y Twitch. */
+  // "Iniciando…" desde el clic hasta que llega el siguiente estado del backend.
+  const [starting, setStarting] = useState(false);
+  useEffect(() => setStarting(false), [state, lastError]);
+
   const startPreset = async () => {
+    setStarting(true);
     try {
       const preset = await loadPreset(selectedPreset);
       addLog(`📂 preset «${preset.name}» cargado`);
       send({ action: "start_preset", payload: { preset } });
     } catch (e) {
       setPresetsError(errorMessage(e));
+      setStarting(false);
+    }
+  };
+
+  const showEditor = async () => {
+    try {
+      await openEditor();
+    } catch (e) {
+      addLog(`✗ no se pudo abrir el editor: ${errorMessage(e)}`);
     }
   };
 
@@ -70,14 +84,19 @@ export default function App() {
     <main className="control">
       <header>
         <h1>Concursillo · Control</h1>
-        <span className={`status status-${status}`}>{STATUS_LABEL[status]}</span>
+        <div className="header-actions">
+          <button className="secondary" onClick={showEditor} title="Abrir el editor (o traerlo al frente)">
+            ✏️ Editor
+          </button>
+          <span className={`status status-${status}`}>{STATUS_LABEL[status]}</span>
+        </div>
       </header>
 
       <section className="panel">
         <h2>Estado</h2>
         {state ? (
           <dl>
-            <dt>Fase</dt><dd>{state.phase}</dd>
+            <dt>Fase</dt><dd key={state.phase} className="flash">{state.phase}</dd>
             <dt>Modo</dt><dd>{state.mode}</dd>
             {!isRosco && <><dt>Ronda</dt><dd>{state.current_question_index + 1} / {state.total_questions}</dd></>}
             <dt>Racha</dt><dd>{state.streak}</dd>
@@ -121,8 +140,8 @@ export default function App() {
             <option key={p.id} value={p.id}>{p.name}</option>
           ))}
         </select>
-        <button onClick={startPreset} disabled={!selectedPreset || status !== "open"}>
-          ▶ Iniciar
+        <button onClick={startPreset} disabled={!selectedPreset || status !== "open" || starting} className={starting ? "is-busy" : undefined}>
+          {starting ? "Iniciando…" : "▶ Iniciar"}
         </button>
         <button className="secondary" onClick={refreshPresets} aria-label="Recargar lista">↻</button>
         {chosen && (

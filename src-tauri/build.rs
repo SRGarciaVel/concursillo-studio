@@ -9,6 +9,12 @@ fn main() {
             "save_preset",
             "load_preset",
             "list_presets",
+            "parse_bulk_questions",
+            "bulk_template",
+            "save_custom_sound",
+            "reset_sound",
+            "list_sounds",
+            "open_editor",
         ]),
     ))
     .expect("failed to run tauri-build");

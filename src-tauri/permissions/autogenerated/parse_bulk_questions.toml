@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-parse-bulk-questions"
+description = "Enables the parse_bulk_questions command without any pre-configured scope."
+commands.allow = ["parse_bulk_questions"]
+
+[[permission]]
+identifier = "deny-parse-bulk-questions"
+description = "Denies the parse_bulk_questions command without any pre-configured scope."
+commands.deny = ["parse_bulk_questions"]

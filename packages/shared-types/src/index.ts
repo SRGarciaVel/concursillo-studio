@@ -21,3 +21,4 @@ export type { TwitchInfo } from "./TwitchInfo";
 export type { TwitchStatus } from "./TwitchStatus";
 export type { Preset } from "./Preset";
 export type { PresetSummary } from "./PresetSummary";
+export type { SoundFileInfo } from "./SoundFileInfo";
