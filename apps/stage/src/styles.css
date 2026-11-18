@@ -187,6 +187,9 @@ html, body { margin: 0; background: transparent; min-height: 100vh; overflow: hi
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
 }
 .timer-num { display: inline-block; }
+.timer-value.digits-3 { font-size: 2.1rem; letter-spacing: -0.02em; }
+.rosco-timer .timer-value { font-size: 2.6rem; }
+.rosco-timer .timer-value.digits-3 { font-size: 1.8rem; }
 .timer.danger .timer-bar { stroke: var(--stage-timer-danger); filter: drop-shadow(0 0 8px color-mix(in srgb, var(--stage-timer-danger) 70%, transparent)); }
 .timer.danger .timer-value { color: var(--stage-timer-danger); }
 .timer.paused .timer-bar { opacity: 0.5; }

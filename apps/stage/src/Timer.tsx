@@ -52,7 +52,8 @@ export function Timer({ state }: { state: GameState }) {
         {/* El offset lo controla anime.js (estilo en línea); React solo pone el valor inicial constante. */}
         <circle ref={bar} className="timer-bar" cx="60" cy="60" r={RADIUS} strokeDasharray={CIRCUMFERENCE} strokeDashoffset={CIRCUMFERENCE} />
       </svg>
-      <span className="timer-value">
+      {/* Con 3 cifras (rosco de 150 s) el número se reduce para no salirse del anillo. */}
+      <span className={`timer-value${!paused && left >= 100 ? " digits-3" : ""}`}>
         <span ref={value} className="timer-num">{paused ? "⏸" : left}</span>
       </span>
     </div>
