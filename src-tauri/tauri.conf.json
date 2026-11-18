@@ -1,4 +1,4 @@
-﻿{
+{
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Concursillo Studio",
   "version": "0.1.0",
@@ -6,8 +6,8 @@
   "build": {
     "beforeDevCommand": "",
     "devUrl": "http://localhost:4321",
-    "beforeBuildCommand": "",
-    "frontendDist": "../apps/control/dist"
+    "beforeBuildCommand": "pnpm build",
+    "frontendDist": "../dist/app"
   },
   "app": {
     "windows": [
@@ -28,6 +28,11 @@
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/icon.ico"
-    ]
+    ],
+    "resources": {
+      "../data/questions/": "data/questions/",
+      "../data/presets/": "data/presets/",
+      "../data/sounds/": "data/sounds/"
+    }
   }
 }

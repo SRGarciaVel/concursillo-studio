@@ -1,0 +1,80 @@
+:root {
+  --bg: #12131a;
+  --panel: #1c1e28;
+  --field: #262938;
+  --border: #353950;
+  --text: #e8e9f0;
+  --muted: #8a8ea3;
+  --accent: #6c5ce7;
+  --ok: #2ecc71;
+  --bad: #e74c3c;
+  font-family: system-ui, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+body { margin: 0; }
+.editor { max-width: 1100px; margin: 0 auto; padding: 16px; display: grid; gap: 16px; }
+h1 { font-size: 1.4rem; margin: 0; }
+h2 { font-size: 1rem; margin: 0 0 12px; color: var(--muted); }
+.panel { background: var(--panel); border-radius: 8px; padding: 16px; }
+.row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+.grow { flex: 1; min-width: 200px; }
+.columns { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+@media (max-width: 800px) { .columns { grid-template-columns: 1fr; } }
+label { display: flex; flex-direction: column; gap: 4px; font-size: 0.85rem; color: var(--muted); }
+input, select, textarea {
+  background: var(--field); color: var(--text); border: 1px solid var(--border);
+  border-radius: 6px; padding: 8px 10px; font: inherit; font-size: 0.95rem;
+}
+textarea { resize: vertical; }
+.form { display: grid; gap: 12px; }
+.answer-row { display: flex; align-items: center; gap: 8px; }
+.answer-row input:not([type="radio"]) { flex: 1; }
+.answer-row.is-correct input:not([type="radio"]) { border-color: var(--ok); }
+.answer-row input[type="radio"] { accent-color: var(--ok); width: 18px; height: 18px; }
+.letter { font-weight: 700; width: 1.2em; }
+.hint { color: var(--muted); font-size: 0.85rem; margin: 0; }
+button {
+  background: var(--accent); color: white; border: 0; border-radius: 6px;
+  padding: 8px 14px; font-size: 0.95rem; cursor: pointer;
+}
+button:hover:not(:disabled) { filter: brightness(1.15); }
+button:disabled { opacity: 0.4; cursor: default; }
+button.secondary { background: var(--field); }
+button.danger { background: var(--bad); }
+.notice { margin: 0; padding: 10px 14px; border-radius: 6px; }
+.notice-ok { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
+.notice-error { background: color-mix(in srgb, var(--bad) 18%, transparent); color: var(--bad); }
+.question-list { margin: 0; padding-left: 24px; display: grid; gap: 10px; }
+.question-list li { padding: 8px 0; border-bottom: 1px solid var(--border); }
+.q-text { font-weight: 600; }
+.q-meta { color: var(--ok); font-size: 0.85rem; margin-top: 2px; }
+.q-actions { display: flex; gap: 4px; margin-top: 6px; }
+.q-actions button { padding: 2px 8px; font-size: 0.8rem; }
+.full { width: 100%; }
+label.check { flex-direction: row; align-items: center; gap: 8px; color: var(--text); padding-bottom: 8px; }
+label.check input { width: 18px; height: 18px; accent-color: var(--accent); }
+select:disabled { opacity: 0.5; }
+.letter-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%;
+  background: var(--field); color: var(--muted); font-weight: 700; font-size: 0.85rem;
+}
+.chip.done { background: var(--ok); color: #0b2b17; }
+.question-list.rosco { list-style: none; padding-left: 0; }
+.q-letter {
+  display: inline-grid; place-items: center; width: 26px; height: 26px; margin-right: 8px;
+  border-radius: 50%; background: var(--accent); font-size: 0.85rem;
+}
+.editor-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.tabs { display: flex; gap: 4px; background: var(--panel); padding: 4px; border-radius: 8px; }
+.tab { background: transparent; color: var(--muted); }
+.tab.active { background: var(--accent); color: white; }
+.tab-body { display: grid; gap: 16px; }
+[hidden] { display: none !important; }
+.preset-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.preset-list li { padding: 8px 0; border-bottom: 1px solid var(--border); }
+.preset-list .q-meta { color: var(--muted); }
+.q-actions code { margin-right: auto; align-self: center; font-size: 0.8rem; }
+.hint.warn { color: var(--bad); }
+code { font-family: ui-monospace, monospace; }

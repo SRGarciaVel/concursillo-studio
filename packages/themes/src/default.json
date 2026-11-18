@@ -1,0 +1,23 @@
+{
+  "id": "default",
+  "name": "Default",
+  "fontUrl": null,
+  "vars": {
+    "--stage-bg": "transparent",
+    "--stage-font": "system-ui, sans-serif",
+    "--stage-text": "#ffffff",
+    "--stage-box": "rgba(10, 12, 40, 0.88)",
+    "--stage-border": "#4c6ef5",
+    "--stage-radius": "999px",
+    "--stage-accent": "#f59f00",
+    "--stage-selected": "#f59f00",
+    "--stage-correct": "#2b8a3e",
+    "--stage-wrong": "#c92a2a",
+    "--stage-timer-track": "rgba(255, 255, 255, 0.15)",
+    "--stage-timer": "#4c6ef5",
+    "--stage-timer-danger": "#fa5252",
+    "--stage-glow": "none",
+    "--stage-pending": "#4a5068",
+    "--stage-passed": "#e0a800"
+  }
+}

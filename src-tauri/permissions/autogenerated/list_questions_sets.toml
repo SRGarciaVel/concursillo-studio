@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-list-questions-sets"
+description = "Enables the list_questions_sets command without any pre-configured scope."
+commands.allow = ["list_questions_sets"]
+
+[[permission]]
+identifier = "deny-list-questions-sets"
+description = "Denies the list_questions_sets command without any pre-configured scope."
+commands.deny = ["list_questions_sets"]

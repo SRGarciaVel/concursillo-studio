@@ -1,0 +1,24 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Ventanas de control y editor: acceso a los comandos de sets de preguntas.",
+  "windows": [
+    "main",
+    "editor"
+  ],
+  "remote": {
+    "urls": [
+      "http://localhost:4321/*",
+      "http://localhost:4324/*"
+    ]
+  },
+  "permissions": [
+    "core:default",
+    "allow-save-questions-set",
+    "allow-load-questions-set",
+    "allow-list-questions-sets",
+    "allow-save-preset",
+    "allow-load-preset",
+    "allow-list-presets"
+  ]
+}

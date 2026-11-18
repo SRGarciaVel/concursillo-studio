@@ -1,0 +1,26 @@
+{
+  "name": "@concursillo/stage",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -p . && vite build",
+    "typecheck": "tsc -p .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@concursillo/shared-types": "workspace:*",
+    "@concursillo/ui": "workspace:*",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "@concursillo/themes": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.3.0",
+    "typescript": "^5.4.5",
+    "vite": "^8.3.8"
+  }
+}

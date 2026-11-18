@@ -1,0 +1,23 @@
+{
+  "id": "clasico",
+  "name": "Clásico",
+  "fontUrl": "https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap",
+  "vars": {
+    "--stage-bg": "radial-gradient(ellipse at center, #1b2a6b 0%, #050a24 75%)",
+    "--stage-font": "'Libre Baskerville', Georgia, serif",
+    "--stage-text": "#ffffff",
+    "--stage-box": "linear-gradient(180deg, #0b1a52 0%, #030a2e 100%)",
+    "--stage-border": "#c9a227",
+    "--stage-radius": "12px",
+    "--stage-accent": "#f2c94c",
+    "--stage-selected": "#e67e22",
+    "--stage-correct": "#27ae60",
+    "--stage-wrong": "#a83226",
+    "--stage-timer-track": "rgba(201, 162, 39, 0.25)",
+    "--stage-timer": "#f2c94c",
+    "--stage-timer-danger": "#ff4d4d",
+    "--stage-glow": "0 0 18px rgba(242, 201, 76, 0.35)",
+    "--stage-pending": "#2c3a7a",
+    "--stage-passed": "#e6b422"
+  }
+}

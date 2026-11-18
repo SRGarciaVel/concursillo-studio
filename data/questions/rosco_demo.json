@@ -1,0 +1,416 @@
+[
+  {
+    "id": "rosco-demo-A",
+    "mode": "Rosco",
+    "category": "Geografía",
+    "difficulty": "Easy",
+    "question": "Capital de Grecia",
+    "answers": [
+      "Atenas"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "A",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "rosco-demo-B",
+    "mode": "Rosco",
+    "category": "Geografía",
+    "difficulty": "Easy",
+    "question": "Capital de Alemania",
+    "answers": [
+      "Berlín",
+      "Múnich",
+      "Hamburgo",
+      "Fráncfort"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "B",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "rosco-demo-C",
+    "mode": "Rosco",
+    "category": "Naturaleza",
+    "difficulty": "Easy",
+    "question": "Animal con joroba que cruza el desierto",
+    "answers": [
+      "Camello"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "C",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "rosco-demo-D",
+    "mode": "Rosco",
+    "category": "Ocio",
+    "difficulty": "Easy",
+    "question": "Juego de mesa con fichas marcadas con puntos",
+    "answers": [
+      "Dominó"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "D",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "rosco-demo-E",
+    "mode": "Rosco",
+    "category": "Naturaleza",
+    "difficulty": "Easy",
+    "question": "Mamífero terrestre más grande del mundo",
+    "answers": [
+      "Elefante"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "E",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "rosco-demo-F",
+    "mode": "Rosco",
+    "category": "Comida",
+    "difficulty": "Easy",
+    "question": "Fruta roja y pequeña con las semillas por fuera",
+    "answers": [
+      "Fresa"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "F",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "rosco-demo-G",
+    "mode": "Rosco",
+    "category": "Naturaleza",
+    "difficulty": "Easy",
+    "question": "Animal doméstico que maúlla",
+    "answers": [
+      "Gato"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "G",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "rosco-demo-H",
+    "mode": "Rosco",
+    "category": "Ciencia",
+    "difficulty": "Easy",
+    "question": "Agua en estado sólido",
+    "answers": [
+      "Hielo"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "H",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "rosco-demo-I",
+    "mode": "Rosco",
+    "category": "Geografía",
+    "difficulty": "Easy",
+    "question": "Porción de tierra rodeada de agua por todas partes",
+    "answers": [
+      "Isla"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "I",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "rosco-demo-J",
+    "mode": "Rosco",
+    "category": "Naturaleza",
+    "difficulty": "Easy",
+    "question": "Animal con el cuello más largo",
+    "answers": [
+      "Jirafa"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "J",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "rosco-demo-K",
+    "mode": "Rosco",
+    "category": "Deporte",
+    "difficulty": "Easy",
+    "question": "Arte marcial japonesa basada en golpes",
+    "answers": [
+      "Kárate"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "K",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "rosco-demo-L",
+    "mode": "Rosco",
+    "category": "Ciencia",
+    "difficulty": "Easy",
+    "question": "Satélite natural de la Tierra",
+    "answers": [
+      "Luna"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "L",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "rosco-demo-M",
+    "mode": "Rosco",
+    "category": "Ciencia",
+    "difficulty": "Easy",
+    "question": "Planeta conocido como el planeta rojo",
+    "answers": [
+      "Venus",
+      "Júpiter",
+      "Marte",
+      "Mercurio"
+    ],
+    "correct": 2,
+    "meta": {
+      "rosco_letter": "M",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "rosco-demo-N",
+    "mode": "Rosco",
+    "category": "Comida",
+    "difficulty": "Easy",
+    "question": "Fruta cítrica de color anaranjado",
+    "answers": [
+      "Naranja"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "N",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "rosco-demo-Ñ",
+    "mode": "Rosco",
+    "category": "Geografía",
+    "difficulty": "Easy",
+    "question": "Elevación natural del terreno, mayor que una colina",
+    "answers": [
+      "Montaña"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "Ñ",
+      "rosco_starts_with": false
+    }
+  },
+  {
+    "id": "rosco-demo-O",
+    "mode": "Rosco",
+    "category": "Naturaleza",
+    "difficulty": "Easy",
+    "question": "Cetáceo blanco y negro llamado ballena asesina",
+    "answers": [
+      "Orca"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "O",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "rosco-demo-P",
+    "mode": "Rosco",
+    "category": "Naturaleza",
+    "difficulty": "Easy",
+    "question": "Ave que no vuela y vive en la Antártida",
+    "answers": [
+      "Pingüino"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "P",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "rosco-demo-Q",
+    "mode": "Rosco",
+    "category": "Comida",
+    "difficulty": "Easy",
+    "question": "Alimento que se obtiene cuajando la leche",
+    "answers": [
+      "Queso"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "Q",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "rosco-demo-R",
+    "mode": "Rosco",
+    "category": "Objetos",
+    "difficulty": "Easy",
+    "question": "Instrumento que marca la hora y se lleva en la muñeca",
+    "answers": [
+      "Reloj"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "R",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "rosco-demo-S",
+    "mode": "Rosco",
+    "category": "Ciencia",
+    "difficulty": "Easy",
+    "question": "Estrella en el centro de nuestro sistema planetario",
+    "answers": [
+      "Sol"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "S",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "rosco-demo-T",
+    "mode": "Rosco",
+    "category": "Naturaleza",
+    "difficulty": "Easy",
+    "question": "Gran felino de pelaje rayado que vive en Asia",
+    "answers": [
+      "León",
+      "Tigre",
+      "Puma",
+      "Lince"
+    ],
+    "correct": 1,
+    "meta": {
+      "rosco_letter": "T",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "rosco-demo-U",
+    "mode": "Rosco",
+    "category": "Comida",
+    "difficulty": "Easy",
+    "question": "Fruto pequeño que crece en racimos y da el vino",
+    "answers": [
+      "Uva"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "U",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "rosco-demo-V",
+    "mode": "Rosco",
+    "category": "Geografía",
+    "difficulty": "Easy",
+    "question": "Montaña que expulsa lava",
+    "answers": [
+      "Volcán"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "V",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "rosco-demo-W",
+    "mode": "Rosco",
+    "category": "Comida",
+    "difficulty": "Easy",
+    "question": "Bebida destilada típica de Escocia",
+    "answers": [
+      "Whisky"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "W",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "rosco-demo-X",
+    "mode": "Rosco",
+    "category": "Ciencia",
+    "difficulty": "Easy",
+    "question": "Gas que respiramos para vivir",
+    "answers": [
+      "Oxígeno"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "X",
+      "rosco_starts_with": false
+    }
+  },
+  {
+    "id": "rosco-demo-Y",
+    "mode": "Rosco",
+    "category": "Comida",
+    "difficulty": "Easy",
+    "question": "Parte amarilla del huevo",
+    "answers": [
+      "Yema"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "Y",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "rosco-demo-Z",
+    "mode": "Rosco",
+    "category": "Objetos",
+    "difficulty": "Easy",
+    "question": "Calzado que cubre el pie",
+    "answers": [
+      "Zapato"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "Z",
+      "rosco_starts_with": true
+    }
+  }
+]

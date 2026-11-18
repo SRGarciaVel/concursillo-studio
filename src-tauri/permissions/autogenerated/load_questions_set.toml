@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-load-questions-set"
+description = "Enables the load_questions_set command without any pre-configured scope."
+commands.allow = ["load_questions_set"]
+
+[[permission]]
+identifier = "deny-load-questions-set"
+description = "Denies the load_questions_set command without any pre-configured scope."
+commands.deny = ["load_questions_set"]

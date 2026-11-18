@@ -1,0 +1,47 @@
+[
+  {
+    "id": "6c8bbb3f-055c-4220-b7ff-8c444e640648",
+    "mode": "Millonario",
+    "category": "Geografía",
+    "difficulty": "Easy",
+    "question": "¿Cuál es el río más largo de Europa?",
+    "answers": [
+      "Danubio",
+      "Volga",
+      "Rin",
+      "Tajo"
+    ],
+    "correct": 1,
+    "meta": null
+  },
+  {
+    "id": "a8c58dc5-3797-4014-81e0-682d308e331c",
+    "mode": "Millonario",
+    "category": "Ciencia",
+    "difficulty": "Medium",
+    "question": "¿Qué planeta tiene más lunas conocidas?",
+    "answers": [
+      "Júpiter",
+      "Marte",
+      "Saturno",
+      "Neptuno"
+    ],
+    "correct": 2,
+    "meta": null
+  },
+  {
+    "id": "7d489af1-440a-403e-89df-77c06f05f9a0",
+    "mode": "Millonario",
+    "category": "Historia",
+    "difficulty": "Hard",
+    "question": "¿En qué año llegó el ser humano a la Luna?",
+    "answers": [
+      "1969",
+      "1972",
+      "1965",
+      "1959"
+    ],
+    "correct": 0,
+    "meta": null
+  }
+]

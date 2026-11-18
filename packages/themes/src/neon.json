@@ -1,0 +1,23 @@
+{
+  "id": "neon",
+  "name": "Neón",
+  "fontUrl": "https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&display=swap",
+  "vars": {
+    "--stage-bg": "#07010f",
+    "--stage-font": "'Orbitron', system-ui, sans-serif",
+    "--stage-text": "#f5f0ff",
+    "--stage-box": "rgba(20, 0, 40, 0.85)",
+    "--stage-border": "#ff2bd6",
+    "--stage-radius": "4px",
+    "--stage-accent": "#00f0ff",
+    "--stage-selected": "#7a1fff",
+    "--stage-correct": "#00c27a",
+    "--stage-wrong": "#ff1744",
+    "--stage-timer-track": "rgba(0, 240, 255, 0.15)",
+    "--stage-timer": "#00f0ff",
+    "--stage-timer-danger": "#ff1744",
+    "--stage-glow": "0 0 12px #ff2bd6, 0 0 32px rgba(255, 43, 214, 0.45)",
+    "--stage-pending": "#2a1446",
+    "--stage-passed": "#ffd400"
+  }
+}

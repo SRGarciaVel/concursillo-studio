@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-save-questions-set"
+description = "Enables the save_questions_set command without any pre-configured scope."
+commands.allow = ["save_questions_set"]
+
+[[permission]]
+identifier = "deny-save-questions-set"
+description = "Denies the save_questions_set command without any pre-configured scope."
+commands.deny = ["save_questions_set"]

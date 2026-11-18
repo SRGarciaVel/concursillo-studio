@@ -1,14 +1,17 @@
-﻿{
+{
   "name": "concursillo-studio",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "pnpm -r dev",
-    "dev:tauri": "cd src-tauri && cargo tauri dev",
-    "build:tauri": "cd src-tauri && cargo tauri build",
-    "gen:types": "cd src-tauri && cargo test export_bindings"
+    "gen:types": "cd src-tauri && cargo test export_bindings",
+    "typecheck": "pnpm -r typecheck",
+    "build": "node scripts/clean-dist.mjs && pnpm -r --filter \"./apps/*\" build",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build"
   },
   "devDependencies": {
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "@tauri-apps/cli": "^2.12.5"
   }
 }

@@ -1,0 +1,23 @@
+// Barrel de los tipos generados por ts-rs (`pnpm gen:types`). Este archivo se mantiene a mano.
+export type { ClientCommand } from "./ClientCommand";
+export type { Difficulty } from "./Difficulty";
+export type { GameMode } from "./GameMode";
+export type { GamePhase } from "./GamePhase";
+export type { GameState } from "./GameState";
+export type { Question } from "./Question";
+export type { QuestionMeta } from "./QuestionMeta";
+export type { ServerMessage } from "./ServerMessage";
+export type { Sound } from "./Sound";
+export type { LetterStatus } from "./LetterStatus";
+export type { RoscoLetter } from "./RoscoLetter";
+export type { RoscoState } from "./RoscoState";
+export type { Comodin } from "./Comodin";
+export type { ComodinStatus } from "./ComodinStatus";
+export type { Hito } from "./Hito";
+export type { HitoStatus } from "./HitoStatus";
+export type { ComodinesState } from "./ComodinesState";
+export type { ChatVotes } from "./ChatVotes";
+export type { TwitchInfo } from "./TwitchInfo";
+export type { TwitchStatus } from "./TwitchStatus";
+export type { Preset } from "./Preset";
+export type { PresetSummary } from "./PresetSummary";
