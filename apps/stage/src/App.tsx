@@ -1,10 +1,13 @@
 import { useEffect, useRef } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import { SoundPlayer, useGameSocket } from "@concursillo/ui";
 import { applyTheme, getTheme } from "@concursillo/themes";
-import type { Sound } from "@concursillo/shared-types";
+import type { GameState, Sound } from "@concursillo/shared-types";
+import { useCelebrations } from "./celebrate";
 import { ComodinBar, ComodinOverlay } from "./Comodines";
 import { RoscoStage } from "./Rosco";
 import { Timer } from "./Timer";
+import { TimeUpFlash } from "./TimeUpFlash";
 
 const LETTERS = ["A", "B", "C", "D"];
 
@@ -47,6 +50,50 @@ export default function App() {
     else p.setLoopPaused(paused);
   }, [phase, paused, player]);
 
+  useCelebrations(state);
+
+  // Modo transparente (OBS): se marca en <html> para que html/body/cristal lo sepan.
+  // Mientras no llega el primer estado no se pinta fondo: si el streamer usa el
+  // modo transparente, OBS nunca ve un destello de color al cargar la fuente.
+  const transparent = state?.transparent_background ?? true;
+  useEffect(() => {
+    document.documentElement.dataset.transparent = String(transparent);
+  }, [transparent]);
+
+  return (
+    <>
+      {!transparent && <div className="stage-backdrop" aria-hidden />}
+      <StageView state={state} />
+      <Watermark />
+    </>
+  );
+}
+
+/** Marca de agua discreta en la esquina inferior derecha. */
+function Watermark() {
+  return (
+    <div className="watermark" aria-hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+        <circle cx="12" cy="12" r="9" strokeDasharray="3.2 2.6" />
+        <circle cx="12" cy="12" r="3.2" fill="currentColor" stroke="none" />
+      </svg>
+      Concursillo Studio
+    </div>
+  );
+}
+
+/** Variantes de entrada/salida de pregunta: de borroso a nítido con desplazamiento vertical. */
+const QUESTION_VARIANTS = {
+  hidden: { opacity: 0, y: 46, filter: "blur(14px)" },
+  shown: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.55, ease: [0.2, 0.9, 0.3, 1], staggerChildren: 0.09, delayChildren: 0.15 } },
+  gone: { opacity: 0, y: -30, filter: "blur(10px)", transition: { duration: 0.28, ease: "easeIn" } },
+} as const;
+const ANSWER_VARIANTS = {
+  hidden: { opacity: 0, y: 30, scale: 0.96, filter: "blur(8px)" },
+  shown: { opacity: 1, y: 0, scale: 1, filter: "blur(0px)", transition: { type: "spring", stiffness: 260, damping: 24 } },
+} as const;
+
+function StageView({ state }: { state: GameState | null }) {
   if (state?.rosco) return <RoscoStage state={state} />;
 
   const q = state?.current_question;
@@ -81,29 +128,39 @@ export default function App() {
         <Timer state={state} />
         <div className="progress-pill">
           Pregunta {state.current_question_index + 1}/{state.total_questions}
-          {state.safety_net > 0 && <span> · 🔒 {state.safety_net}</span>}
+          {state.safety_net > 0 && <span className="net"> · 🔒 {state.safety_net}</span>}
         </div>
       </div>
-      <div className="question">{q.question}</div>
-      <div className="answers">
-        {q.answers.map((answer, i) => {
-          let cls = "answer";
-          if (state.selected_answer === i) cls += " selected";
-          if (revealed && i === q.correct) cls += " correct";
-          else if (revealed && state.selected_answer === i) cls += " wrong";
-          return (
-            <div key={i} className={cls}>
-              <span className="letter">{LETTERS[i] ?? i + 1}:</span> {answer}
-            </div>
-          );
-        })}
-      </div>
+      {/* Cada pregunta entra "de borroso a nítido" y las respuestas en cascada. */}
+      <AnimatePresence mode="wait">
+        <motion.div key={q.id} className="question-block" variants={QUESTION_VARIANTS} initial="hidden" animate="shown" exit="gone">
+          <motion.div className="question" variants={ANSWER_VARIANTS}>
+            {q.question}
+          </motion.div>
+          <div className="answers">
+            {q.answers.map((answer, i) => {
+              let cls = "answer";
+              if (state.selected_answer === i) cls += " selected";
+              if (revealed && i === q.correct) cls += " correct";
+              else if (revealed && state.selected_answer === i) cls += " wrong";
+              return (
+                <motion.div key={i} className={cls} variants={ANSWER_VARIANTS}>
+                  <span className="letter">{LETTERS[i] ?? i + 1}</span>
+                  <span className="answer-text">{answer}</span>
+                </motion.div>
+              );
+            })}
+          </div>
+        </motion.div>
+      </AnimatePresence>
       {state.phase === "GameOver" && (
         <div className="banner bad">
-          {timedOut ? "¡Se acabó el tiempo!" : "Fin de la partida"}
+          {timedOut ? "Tiempo agotado" : "Fin de la partida"}
           {state.prize_level !== null && <span className="banner-sub"> · se lleva {state.prize_level} aciertos</span>}
         </div>
       )}
+      {/* «¡TIEMPO!» con zoom y destello; se desvanece y deja ver la respuesta correcta. */}
+      {timedOut && <TimeUpFlash key={`timeout-${q.id}`} />}
       {state.phase === "Won" && <div className="banner ok">¡Has ganado!</div>}
     </main>
   );

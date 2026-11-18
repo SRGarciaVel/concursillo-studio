@@ -76,6 +76,9 @@ pub struct GameState {
     pub streak: usize,
     /// Id del tema visual activo (ver `packages/themes`).
     pub theme: String,
+    /// Fondo 100% transparente en el stage (para superponerlo en OBS).
+    /// Es configuración de emisión: sobrevive a Reset y a partidas nuevas.
+    pub transparent_background: bool,
     /// Estado del rosco (letras y contadores). `None` en modo Millonario.
     pub rosco: Option<RoscoState>,
     /// Estado de cada comodín (siempre los 4, en orden fijo).
@@ -139,6 +142,7 @@ impl GameState {
             is_correct: None,
             streak: 0,
             theme: DEFAULT_THEME.to_string(),
+            transparent_background: false,
             rosco: None,
             comodines: ComodinesState::default(),
             active_comodin: None,
@@ -232,12 +236,15 @@ impl GameState {
     }
 
     /// Partida nueva desde cero, conservando lo que no es de la partida:
-    /// el tema, la conexión a Twitch, el tiempo por pregunta y la versión de sonidos.
+    /// el tema, el fondo transparente, la conexión a Twitch, el tiempo por pregunta
+    /// y la versión de sonidos.
     fn restart(&mut self, mode: GameMode, total_questions: usize) {
         let theme = std::mem::take(&mut self.theme);
         let twitch = std::mem::take(&mut self.twitch);
         let (question_time, sounds_version) = (self.question_time, self.sounds_version);
+        let transparent_background = self.transparent_background;
         *self = Self::new(mode, total_questions);
+        self.transparent_background = transparent_background;
         self.theme = theme;
         self.twitch = twitch;
         self.question_time = question_time;

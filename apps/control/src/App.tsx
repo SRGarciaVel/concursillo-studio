@@ -1,12 +1,41 @@
-import { useEffect, useState } from "react";
-import { errorMessage, listPresets, loadPreset, openEditor, useGameSocket } from "@concursillo/ui";
-import { THEMES, getTheme } from "@concursillo/themes";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { AnimatePresence, LayoutGroup, motion } from "motion/react";
+import { Gamepad2, Palette, SquarePen } from "lucide-react";
+import { Badge, Button, Select, Switch, errorMessage, listPresets, loadPreset, openEditor, useGameSocket } from "@concursillo/ui";
+import { THEMES } from "@concursillo/themes";
 import type { ClientCommand, PresetSummary } from "@concursillo/shared-types";
-import { ComodinesPanel } from "./ComodinesPanel";
-import { RoscoPanel } from "./RoscoPanel";
-import { TwitchPanel } from "./TwitchPanel";
+import { ActionsCard } from "./ActionsCard";
+import { ComodinesCard } from "./ComodinesCard";
+import { LogCard, type LogEntry } from "./LogCard";
+import { PresetCard } from "./PresetCard";
+import { StatusCard } from "./StatusCard";
+import { TwitchCard } from "./TwitchCard";
 
-const STATUS_LABEL = { open: "Conectado", connecting: "Conectando…", closed: "Desconectado" };
+/** Muelle elástico para recolocar paneles. */
+const LAYOUT_SPRING = { type: "spring", stiffness: 260, damping: 26, mass: 0.9 } as const;
+
+/** Contenedor de tarjeta que se recoloca con animación (layout) y entra/sale con fundido. */
+function Panel({ id, className, children }: { id: string; className?: string; children: ReactNode }) {
+  return (
+    <motion.div
+      layout="position"
+      layoutId={`panel-${id}`}
+      transition={LAYOUT_SPRING}
+      initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
+      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      exit={{ opacity: 0, y: -8, filter: "blur(4px)" }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+const CONNECTION = {
+  open: { label: "Motor conectado", variant: "success" as const, dot: "pulse" as const },
+  connecting: { label: "Conectando…", variant: "warning" as const, dot: true },
+  closed: { label: "Motor desconectado", variant: "danger" as const, dot: true },
+};
 
 /** Resumen corto para el log (las listas de preguntas son demasiado largas). */
 function describe(cmd: ClientCommand): string {
@@ -15,24 +44,29 @@ function describe(cmd: ClientCommand): string {
   if (cmd.action === "start_preset") return `start_preset «${cmd.payload.preset.name}» (${cmd.payload.preset.mode})`;
   // Nunca escribir el token en el log.
   if (cmd.action === "connect_twitch") return `connect_twitch #${cmd.payload.channel}${cmd.payload.token ? " (con token)" : " (anónimo)"}`;
-  return JSON.stringify(cmd);
+  return "payload" in cmd ? `${cmd.action} ${JSON.stringify(cmd.payload)}` : cmd.action;
 }
 
 export default function App() {
   const { state, status, lastError, sendCommand } = useGameSocket();
-  const [log, setLog] = useState<string[]>([]);
+  const [log, setLog] = useState<LogEntry[]>([]);
+  const logId = useRef(0);
   const [presets, setPresets] = useState<PresetSummary[]>([]);
   const [selectedPreset, setSelectedPreset] = useState("");
   const [presetsError, setPresetsError] = useState<string | null>(null);
-  const chosen = presets.find((p) => p.id === selectedPreset);
 
-  const addLog = (line: string) =>
-    setLog((l) => [`${new Date().toLocaleTimeString()} ${line}`, ...l].slice(0, 30));
+  const addLog = (kind: LogEntry["kind"], text: string) =>
+    setLog((l) => [{ id: ++logId.current, time: new Date().toLocaleTimeString(), kind, text }, ...l].slice(0, 60));
 
   const send = (cmd: ClientCommand) => {
     const ok = sendCommand(cmd);
-    addLog(`${ok ? "→" : "✗"} ${describe(cmd)}`);
+    addLog(ok ? "sent" : "fail", ok ? describe(cmd) : `sin conexión: ${describe(cmd)}`);
   };
+
+  // Los errores del backend también quedan en el log (en rojo).
+  useEffect(() => {
+    if (lastError) addLog("error", lastError);
+  }, [lastError]);
 
   const refreshPresets = async () => {
     try {
@@ -49,16 +83,16 @@ export default function App() {
     void refreshPresets();
   }, []);
 
-  /** Un único comando: el backend aplica modo, preguntas, tiempo, tema y Twitch. */
   // "Iniciando…" desde el clic hasta que llega el siguiente estado del backend.
   const [starting, setStarting] = useState(false);
   useEffect(() => setStarting(false), [state, lastError]);
 
+  /** Un único comando: el backend aplica modo, preguntas, tiempo, tema y Twitch. */
   const startPreset = async () => {
     setStarting(true);
     try {
       const preset = await loadPreset(selectedPreset);
-      addLog(`📂 preset «${preset.name}» cargado`);
+      addLog("info", `preset «${preset.name}» cargado`);
       send({ action: "start_preset", payload: { preset } });
     } catch (e) {
       setPresetsError(errorMessage(e));
@@ -70,137 +104,109 @@ export default function App() {
     try {
       await openEditor();
     } catch (e) {
-      addLog(`✗ no se pudo abrir el editor: ${errorMessage(e)}`);
+      addLog("error", `no se pudo abrir el editor: ${errorMessage(e)}`);
     }
   };
 
-  const q = state?.current_question;
-  const canLoadNext =
-    state?.phase === "Idle" && state.current_question_index < state.total_questions;
-  const questionLive = state?.phase === "ReadingQuestion" || state?.phase === "Selecting";
-  const isRosco = !!state?.rosco;
+  const conn = CONNECTION[status];
+  const online = status === "open";
 
+  // h-screen + overflow-hidden: la ventana nunca hace scroll; si algo no cabe, solo se desplaza su columna.
   return (
-    <main className="control">
-      <header>
-        <h1>Concursillo · Control</h1>
-        <div className="header-actions">
-          <button className="secondary" onClick={showEditor} title="Abrir el editor (o traerlo al frente)">
-            ✏️ Editor
-          </button>
-          <span className={`status status-${status}`}>{STATUS_LABEL[status]}</span>
+    <div className="mx-auto flex h-screen max-w-[1600px] flex-col gap-3 overflow-hidden p-3 lg:px-4">
+      {/* Cabecera: marca, conexión, tema y editor. */}
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-fuchsia-600 shadow-lg shadow-brand-600/30">
+            <Gamepad2 className="size-5 text-white" />
+          </div>
+          <div>
+            <h1 className="text-lg font-bold leading-tight tracking-tight">Concursillo Studio</h1>
+            <p className="text-xs text-zinc-500">Panel de control</p>
+          </div>
+          <Badge variant={conn.variant} dot={conn.dot} className="ml-2">
+            {conn.label}
+          </Badge>
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="flex items-center gap-2 text-xs text-zinc-400">
+            <Palette className="size-4" />
+            <span className="sr-only sm:not-sr-only">Tema</span>
+            <Select
+              name="theme"
+              className="w-36"
+              value={state?.theme ?? ""}
+              disabled={!online}
+              onChange={(e) => send({ action: "change_theme", payload: e.target.value })}
+            >
+              {THEMES.map((t) => (
+                <option key={t.id} value={t.id}>{t.name}</option>
+              ))}
+            </Select>
+          </label>
+          {/* Fondo transparente: el stage se superpone limpio sobre el gameplay o la webcam en OBS. */}
+          <div className="rounded-xl border border-line bg-white/[0.03] px-3 py-1.5" title="Quita el fondo del stage para superponerlo en OBS">
+            <Switch
+              name="transparent_background"
+              label="Fondo transparente"
+              checked={state?.transparent_background ?? false}
+              disabled={!online}
+              onChange={(on) => send({ action: "set_transparent_background", payload: on })}
+            />
+          </div>
+          <Button variant="secondary" icon={SquarePen} onClick={showEditor} title="Abrir el editor (o traerlo al frente)">
+            Editor
+          </Button>
         </div>
       </header>
 
-      <section className="panel">
-        <h2>Estado</h2>
-        {state ? (
-          <dl>
-            <dt>Fase</dt><dd key={state.phase} className="flash">{state.phase}</dd>
-            <dt>Modo</dt><dd>{state.mode}</dd>
-            {!isRosco && <><dt>Ronda</dt><dd>{state.current_question_index + 1} / {state.total_questions}</dd></>}
-            <dt>Racha</dt><dd>{state.streak}</dd>
-            <dt>Tiempo</dt>
-            <dd className={state.time_remaining < 5 ? "danger" : undefined}>
-              {state.time_remaining}s / {state.time_limit}s{state.timer_paused && " ⏸ pausado"}
-            </dd>
-            <dt>Tema</dt><dd>{state.theme}</dd>
-            {!isRosco && <>
-            <dt>Respuesta</dt>
-            <dd>
-              {state.selected_answer ?? "—"}
-              {state.is_correct !== null && (state.is_correct ? " ✔ correcta" : " ✘ incorrecta")}
-            </dd>
-            <dt>Pregunta</dt>
-            <dd>
-              {q ? (
-                <>
-                  {q.question}
-                  <ol start={0}>
-                    {q.answers.map((a, i) => (
-                      <li key={i} className={i === q.correct ? "correct" : undefined}>{a}</li>
-                    ))}
-                  </ol>
-                </>
-              ) : "—"}
-            </dd>
-            </>}
-          </dl>
-        ) : (
-          <p>Sin datos del servidor.</p>
-        )}
-        {lastError && <p className="error">Error del servidor: {lastError}</p>}
-      </section>
-
-      <section className="panel actions">
-        <h2>Preset</h2>
-        <select name="preset" value={selectedPreset} onChange={(e) => setSelectedPreset(e.target.value)}>
-          {presets.length === 0 && <option value="">(ningún preset: créalo en el editor)</option>}
-          {presets.map((p) => (
-            <option key={p.id} value={p.id}>{p.name}</option>
-          ))}
-        </select>
-        <button onClick={startPreset} disabled={!selectedPreset || status !== "open" || starting} className={starting ? "is-busy" : undefined}>
-          {starting ? "Iniciando…" : "▶ Iniciar"}
-        </button>
-        <button className="secondary" onClick={refreshPresets} aria-label="Recargar lista">↻</button>
-        {chosen && (
-          <p className="muted preset-info">
-            {chosen.mode} · {chosen.question_count} preguntas · tema {getTheme(chosen.theme).name} ·{" "}
-            {chosen.mode === "Rosco" ? `${chosen.time_limit}s en total` : `${chosen.time_limit}s por pregunta`}
-            {chosen.twitch_channel ? ` · Twitch #${chosen.twitch_channel}` : ""}
-          </p>
-        )}
-        {presetsError && <p className="error">{presetsError}</p>}
-      </section>
-
-      {state && <TwitchPanel state={state} send={send} />}
-
-      <section className="panel actions">
-        <h2>Tema del stage</h2>
-        <select
-          name="theme"
-          value={state?.theme ?? ""}
-          disabled={status !== "open"}
-          onChange={(e) => send({ action: "change_theme", payload: e.target.value })}
-        >
-          {THEMES.map((t) => (
-            <option key={t.id} value={t.id}>{t.name}</option>
-          ))}
-        </select>
-      </section>
-
-      {isRosco && state && <RoscoPanel state={state} send={send} />}
-      {!isRosco && state && <ComodinesPanel state={state} send={send} />}
-
-      <section className="panel actions">
-        <h2>Acciones</h2>
-        {!isRosco && (
-          <>
-            <button onClick={() => send({ action: "load_next_question" })} disabled={!canLoadNext}>
-              Cargar siguiente pregunta
-            </button>
-            <button onClick={() => q && send({ action: "submit_answer", payload: q.correct })} disabled={!q}>
-              Simular correcta
-            </button>
-            <button onClick={() => q && send({ action: "submit_answer", payload: (q.correct + 1) % q.answers.length })} disabled={!q}>
-              Simular incorrecta
-            </button>
-          </>
-        )}
-        {state?.timer_paused ? (
-          <button onClick={() => send({ action: "resume_timer" })} disabled={!questionLive}>▶ Reanudar reloj</button>
-        ) : (
-          <button onClick={() => send({ action: "pause_timer" })} disabled={!questionLive}>⏸ Pausar reloj</button>
-        )}
-        {!isRosco && <button onClick={() => send({ action: "next_round" })}>Next Round</button>}
-        <button className="danger" onClick={() => send({ action: "reset_game" })}>Reset Game</button>
-      </section>
-
-      <section className="panel">
-        <h2>Log</h2>
-        <pre className="log">{log.join("\n") || "—"}</pre>
-      </section>
-    </main>
+      {/* Dashboard: juego a la izquierda, configuración y comodines a la derecha. */}
+      {/*
+        LayoutGroup: cuando cambia el contenido de una tarjeta (Millonario ↔ Rosco,
+        comodín abierto, log desplegado…) las demás se recolocan con un muelle
+        en lugar de saltar de golpe.
+      */}
+      <LayoutGroup>
+        <main className="grid min-h-0 flex-1 grid-cols-1 gap-3 overflow-y-auto lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:overflow-visible">
+          <div className="flex min-h-0 min-w-0 flex-col gap-3 lg:-mr-1 lg:overflow-y-auto lg:pr-1">
+            <Panel id="status">
+              <StatusCard state={state} />
+            </Panel>
+            <Panel id="actions">
+              <ActionsCard state={state} online={online} send={send} />
+            </Panel>
+            <Panel id="log" className="flex min-h-0 flex-1 flex-col">
+              <LogCard entries={log} onClear={() => setLog([])} />
+            </Panel>
+          </div>
+          <div className="flex min-h-0 min-w-0 flex-col gap-3 lg:-mr-1 lg:overflow-y-auto lg:pr-1">
+            <Panel id="preset">
+              <PresetCard
+                presets={presets}
+                selected={selectedPreset}
+                onSelect={setSelectedPreset}
+                onStart={startPreset}
+                onRefresh={refreshPresets}
+                starting={starting}
+                online={online}
+                error={presetsError}
+              />
+            </Panel>
+            <AnimatePresence initial={false}>
+              {state && (
+                <Panel id="twitch" key="twitch">
+                  <TwitchCard state={state} send={send} />
+                </Panel>
+              )}
+              {state && (
+                <Panel id="comodines" key="comodines">
+                  <ComodinesCard state={state} send={send} />
+                </Panel>
+              )}
+            </AnimatePresence>
+          </div>
+        </main>
+      </LayoutGroup>
+    </div>
   );
 }

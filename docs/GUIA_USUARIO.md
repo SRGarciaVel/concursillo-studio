@@ -163,7 +163,8 @@ La app tiene que estar **abierta** mientras emites: el Stage se sirve desde ella
 Notas:
 
 - Con las dos casillas marcadas, el Stage se reconecta al mostrar la escena y **recibe el estado actual al instante**: puedes cambiar de escena en mitad de una partida sin perder nada.
-- El tema **Default** tiene fondo **transparente** (se ve tu escena detrás). **Clásico** y **Neón** pintan su propio fondo.
+- Cada tema pinta un fondo sobrio: **Default** gris mate, **Clásico** azul profundo con viñeta y **Neón** casi negro con resplandor en los bordes.
+- Activa **Fondo transparente** en la cabecera del Control para superponer el Stage sobre tu gameplay o webcam: el fondo desaparece por completo y solo quedan las cajas de cristal. Se mantiene aunque reinicies la partida.
 - No necesitas recargar OBS al cambiar sonidos o temas: el Stage se actualiza solo.
 - Puedes comprobar la URL en cualquier navegador del mismo PC antes de configurarla en OBS.
 

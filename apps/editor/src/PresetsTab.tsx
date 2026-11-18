@@ -11,11 +11,13 @@ import {
 } from "@concursillo/ui";
 import { THEMES, getTheme } from "@concursillo/themes";
 import type { GameMode, Preset, PresetSummary, Question } from "@concursillo/shared-types";
+import { Eraser, Layers, Library, Save, SquarePen } from "lucide-react";
+import { Badge, Button, Card, Field, Input, Notice, Select } from "@concursillo/ui";
 
 const DEFAULT_TIME: Record<GameMode, number> = { Millonario: 30, Rosco: 150 };
 const TIME_RANGE: Record<GameMode, [number, number]> = { Millonario: [5, 300], Rosco: [30, 900] };
 
-type Notice = { kind: "ok" | "error"; text: string } | null;
+type NoticeState = { kind: "ok" | "error"; text: string } | null;
 
 interface Form {
   name: string;
@@ -37,7 +39,7 @@ export function PresetsTab() {
   const [form, setForm] = useState<Form>(EMPTY);
   // Preguntas del set elegido (se copian dentro del preset al guardar).
   const [questions, setQuestions] = useState<Question[] | null>(null);
-  const [notice, setNotice] = useState<Notice>(null);
+  const [notice, setNotice] = useState<NoticeState>(null);
 
   const mode: GameMode | null = questions ? detectSetMode(questions) : null;
   const id = form.id.trim() || slugify(form.name);
@@ -118,104 +120,113 @@ export function PresetsTab() {
   };
 
   return (
-    <>
-      {notice && <p className={`notice notice-${notice.kind}`}>{notice.text}</p>}
-      <div className="columns">
-        <form className="panel form" onSubmit={save}>
-          <h2>Nuevo preset</h2>
-          <label>
-            Nombre
-            <input name="presetName" value={form.name} placeholder="Gran final del viernes" onChange={(e) => setForm({ ...form, name: e.target.value })} />
-          </label>
-          <p className="hint">
-            Archivo: <code>data/presets/{id || "…"}.json</code>
-            {overwriting && " · ⚠ ya existe: se sobrescribirá"}
-          </p>
-          <label>
-            Set de preguntas
-            <select name="presetSet" value={form.set} onChange={(e) => void chooseSet(e.target.value)}>
-              <option value="">{questions && !form.set ? "(preguntas del preset cargado)" : "— elige un set —"}</option>
-              {sets.map((s) => (
-                <option key={s} value={s}>{s}.json</option>
-              ))}
-            </select>
-          </label>
-          {questions && mode && (
-            <p className="hint">
-              Modo detectado: <strong>{mode}</strong> · {questions.length} preguntas
-              {mode === "Millonario" && questions.length > 15 && ` (15 se juegan, ${questions.length - 15} de reserva)`}
-            </p>
-          )}
-          <div className="row">
-            <label className="grow">
-              Tema
-              <select name="presetTheme" value={form.theme} onChange={(e) => setForm({ ...form, theme: e.target.value })}>
-                {THEMES.map((t) => (
-                  <option key={t.id} value={t.id}>{t.name}</option>
+    <div className="flex flex-col gap-4">
+      {notice && <Notice kind={notice.kind}>{notice.text}</Notice>}
+      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+        <Card title={form.id ? "Editar preset" : "Nuevo preset"} icon={Layers}>
+          <form className="flex flex-col gap-4" onSubmit={save}>
+            <Field
+              label="Nombre"
+              hint={
+                <>
+                  Archivo: <code className="font-mono text-zinc-400">data/presets/{id || "…"}.json</code>
+                  {overwriting && <span className="text-amber-300"> · ya existe: se sobrescribirá</span>}
+                </>
+              }
+            >
+              <Input name="presetName" value={form.name} placeholder="Gran final del viernes" onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            </Field>
+            <Field
+              label="Set de preguntas"
+              hint={
+                questions && mode ? (
+                  <span className="inline-flex flex-wrap items-center gap-1.5">
+                    <Badge variant="accent">{mode}</Badge>
+                    {questions.length} preguntas
+                    {mode === "Millonario" && questions.length > 15 && ` · 15 se juegan, ${questions.length - 15} de reserva`}
+                  </span>
+                ) : undefined
+              }
+            >
+              <Select name="presetSet" value={form.set} onChange={(e) => void chooseSet(e.target.value)}>
+                <option value="">{questions && !form.set ? "(preguntas del preset cargado)" : "— elige un set —"}</option>
+                {sets.map((s) => (
+                  <option key={s} value={s}>{s}.json</option>
                 ))}
-              </select>
-            </label>
-            <label>
-              {mode === "Rosco" ? "Tiempo total (s)" : "Segundos por pregunta"}
-              <input
-                name="presetTime"
-                type="number"
-                min={minT}
-                max={maxT}
-                value={form.timeLimit}
-                onChange={(e) => setForm({ ...form, timeLimit: Number(e.target.value) })}
-              />
-            </label>
-            {mode === "Rosco" && (
-              <label>
-                Aciertos para ganar
-                <input
-                  name="presetMinCorrect"
+              </Select>
+            </Field>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <Field label="Tema">
+                <Select name="presetTheme" value={form.theme} onChange={(e) => setForm({ ...form, theme: e.target.value })}>
+                  {THEMES.map((t) => (
+                    <option key={t.id} value={t.id}>{t.name}</option>
+                  ))}
+                </Select>
+              </Field>
+              <Field label={mode === "Rosco" ? "Tiempo total (s)" : "Segundos por pregunta"} error={!timeValid ? `Entre ${minT} y ${maxT} s` : undefined}>
+                <Input
+                  name="presetTime"
                   type="number"
-                  min={1}
-                  max={27}
-                  value={form.minCorrect}
-                  onChange={(e) => setForm({ ...form, minCorrect: Number(e.target.value) })}
+                  min={minT}
+                  max={maxT}
+                  aria-invalid={!timeValid}
+                  value={form.timeLimit}
+                  onChange={(e) => setForm({ ...form, timeLimit: Number(e.target.value) })}
                 />
-              </label>
-            )}
-          </div>
-          {!timeValid && <p className="hint warn">El tiempo debe estar entre {minT} y {maxT} s.</p>}
-          <label>
-            Canal de Twitch <small>(opcional: se conecta solo al iniciar)</small>
-            <input name="presetTwitch" value={form.twitchChannel} placeholder="tu_canal" onChange={(e) => setForm({ ...form, twitchChannel: e.target.value })} />
-          </label>
-          <div className="row">
-            <button type="submit" disabled={!canSave}>Guardar Preset</button>
-            <button type="button" className="secondary" onClick={() => { setForm(EMPTY); setQuestions(null); }}>
-              Limpiar
-            </button>
-          </div>
-        </form>
+              </Field>
+              {mode === "Rosco" && (
+                <Field label="Aciertos para ganar">
+                  <Input
+                    name="presetMinCorrect"
+                    type="number"
+                    min={1}
+                    max={27}
+                    value={form.minCorrect}
+                    onChange={(e) => setForm({ ...form, minCorrect: Number(e.target.value) })}
+                  />
+                </Field>
+              )}
+            </div>
+            <Field label="Canal de Twitch" hint="Opcional: se conecta (en anónimo) al iniciar el preset.">
+              <Input name="presetTwitch" value={form.twitchChannel} placeholder="tu_canal" onChange={(e) => setForm({ ...form, twitchChannel: e.target.value })} />
+            </Field>
+            <div className="flex gap-2">
+              <Button type="submit" variant="primary" size="lg" icon={Save} disabled={!canSave} className="flex-1">
+                Guardar preset
+              </Button>
+              <Button variant="ghost" size="lg" icon={Eraser} onClick={() => { setForm(EMPTY); setQuestions(null); }}>
+                Limpiar
+              </Button>
+            </div>
+          </form>
+        </Card>
 
-        <section className="panel">
-          <h2>Presets guardados ({presets.length})</h2>
+        <Card title={`Presets guardados (${presets.length})`} icon={Library}>
           {presets.length === 0 ? (
-            <p className="hint">Todavía no hay presets.</p>
+            <p className="text-sm text-zinc-500">Todavía no hay presets.</p>
           ) : (
-            <ul className="preset-list">
+            <ul className="flex flex-col gap-2">
               {presets.map((p) => (
-                <li key={p.id}>
-                  <div className="q-text">{p.name}</div>
-                  <div className="q-meta">
-                    {p.mode} · {p.question_count} preguntas · {getTheme(p.theme).name} · {p.time_limit}s
-                    {p.twitch_channel && ` · #${p.twitch_channel}`}
+                <li key={p.id} className="group flex items-center gap-3 rounded-xl border border-line bg-zinc-950/40 px-3 py-2.5 transition-colors hover:border-white/15">
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate font-semibold">{p.name}</div>
+                    <div className="mt-1 flex flex-wrap gap-1.5">
+                      <Badge variant="accent">{p.mode}</Badge>
+                      <Badge>{p.question_count} {p.mode === "Rosco" ? "letras" : "preguntas"}</Badge>
+                      <Badge>{getTheme(p.theme).name}</Badge>
+                      <Badge>{p.time_limit}s</Badge>
+                      {p.twitch_channel && <Badge variant="info">#{p.twitch_channel}</Badge>}
+                    </div>
                   </div>
-                  <div className="q-actions">
-                    <code className="muted">{p.id}.json</code>
-                    <button className="secondary" onClick={() => void edit(p.id)}>Editar</button>
-                  </div>
+                  <Button variant="secondary" size="sm" icon={SquarePen} onClick={() => void edit(p.id)}>
+                    Editar
+                  </Button>
                 </li>
               ))}
             </ul>
           )}
-        </section>
+        </Card>
       </div>
-    </>
+    </div>
   );
 }

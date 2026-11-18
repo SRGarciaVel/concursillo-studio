@@ -11,12 +11,19 @@
   },
   "dependencies": {
     "@concursillo/shared-types": "workspace:*",
+    "@concursillo/themes": "workspace:*",
     "@concursillo/ui": "workspace:*",
+    "@fontsource-variable/orbitron": "^5.3.0",
+    "@fontsource-variable/oswald": "^5.3.0",
+    "@fontsource-variable/outfit": "^5.3.0",
+    "animejs": "^4.5.0",
+    "canvas-confetti": "^1.9.4",
+    "motion": "^14.14.0",
     "react": "^19.3.1",
-    "react-dom": "^19.3.1",
-    "@concursillo/themes": "workspace:*"
+    "react-dom": "^19.3.1"
   },
   "devDependencies": {
+    "@types/canvas-confetti": "^1.9.0",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.3.0",

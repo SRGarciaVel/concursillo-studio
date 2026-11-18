@@ -62,6 +62,8 @@ pub enum ClientCommand {
     ResumeTimer,
     /// Cambia el tema visual (id de `packages/themes`).
     ChangeTheme(String),
+    /// Activa/desactiva el fondo transparente del stage (para OBS).
+    SetTransparentBackground(bool),
     /// Nueva partida de Rosco (27 preguntas, una por letra A–Z + Ñ).
     /// `time_limit`: segundos totales (por defecto 150).
     /// `min_correct`: aciertos para ganar (por defecto, las 27).
@@ -107,6 +109,9 @@ pub enum ClientCommand {
     /// Inicia una partida con un preset completo (modo, preguntas, tiempo,
     /// tema) y, si tiene canal, conecta a Twitch.
     StartPreset { preset: Preset },
+    /// Soundboard del presentador: reenvía un sonido al stage. No cambia el
+    /// estado de la partida (solo hace de puente Control → Stage).
+    PlaySound { sound: Sound },
     /// Solo en builds de desarrollo: inyecta un mensaje como si llegara del
     /// chat, para ensayar el comodín sin Twitch. En release no existe.
     #[cfg(debug_assertions)]
@@ -115,7 +120,7 @@ pub enum ClientCommand {
 
 /// Efectos de sonido que el stage debe reproducir. El nombre es también el
 /// nombre del archivo en `data/sounds/` (`play_tension.mp3`, ...).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, TS)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, TS)]
 #[serde(rename_all = "snake_case")]
 #[ts(export, export_to = "../../packages/shared-types/src/")]
 pub enum Sound {
@@ -125,10 +130,22 @@ pub enum Sound {
     PlayWin,
     /// Pasapalabra (opcional: si no hay archivo, el stage lo ignora).
     PlayPass,
+    /// Soundboard: redoble de tambor.
+    PlayDrumroll,
+    /// Soundboard: aplausos.
+    PlayApplause,
 }
 
 impl Sound {
-    pub const ALL: [Sound; 5] = [Sound::PlayTension, Sound::PlayCorrect, Sound::PlayWrong, Sound::PlayWin, Sound::PlayPass];
+    pub const ALL: [Sound; 7] = [
+        Sound::PlayTension,
+        Sound::PlayCorrect,
+        Sound::PlayWrong,
+        Sound::PlayWin,
+        Sound::PlayPass,
+        Sound::PlayDrumroll,
+        Sound::PlayApplause,
+    ];
 
     /// Nombre del archivo sin extensión (igual que en JSON): `play_tension`, ...
     pub fn file_stem(self) -> &'static str {
@@ -138,6 +155,8 @@ impl Sound {
             Sound::PlayWrong => "play_wrong",
             Sound::PlayWin => "play_win",
             Sound::PlayPass => "play_pass",
+            Sound::PlayDrumroll => "play_drumroll",
+            Sound::PlayApplause => "play_applause",
         }
     }
 
@@ -269,6 +288,7 @@ impl AppState {
             ClientCommand::PauseTimer => game.set_timer_paused(true),
             ClientCommand::ResumeTimer => game.set_timer_paused(false),
             ClientCommand::ChangeTheme(theme) => game.set_theme(&theme)?,
+            ClientCommand::SetTransparentBackground(on) => game.transparent_background = on,
             ClientCommand::InitRosco { questions, time_limit, min_correct } => {
                 game.init_rosco(questions, time_limit, min_correct)?;
             }
@@ -287,6 +307,13 @@ impl AppState {
                 let channel = normalize_channel(&channel)?;
                 let creds = credentials(username.as_deref(), token.as_deref())?;
                 self.connect_twitch(&mut game, channel, creds);
+            }
+            ClientCommand::PlaySound { sound: s } => {
+                if s == Sound::PlayTension {
+                    // La tensión suena en bucle ligada a la pregunta: no se lanza a mano.
+                    return Err("La tensión no se puede lanzar desde el soundboard".into());
+                }
+                sound = Some(s);
             }
             ClientCommand::StartPreset { preset } => {
                 let preset = game.start_preset(&preset)?;
@@ -489,6 +516,12 @@ mod tests {
         app.apply(ClientCommand::ChangeTheme("neon".into())).await.unwrap();
         assert_eq!(app.game.read().await.theme, "neon");
         assert!(app.apply(ClientCommand::ChangeTheme("Bad Theme".into())).await.is_err());
+
+        app.apply(ClientCommand::SetTransparentBackground(true)).await.unwrap();
+        assert!(app.game.read().await.transparent_background);
+        // Es configuración de emisión: sobrevive a reiniciar la partida.
+        app.apply(ClientCommand::ResetGame).await.unwrap();
+        assert!(app.game.read().await.transparent_background);
     }
 
     #[tokio::test]
@@ -570,6 +603,20 @@ mod tests {
         let g = app.game.read().await;
         assert_eq!((g.mode, g.time_limit, g.theme.as_str()), (GameMode::Rosco, 120, "neon"));
         assert_eq!(g.twitch.status, TwitchStatus::Disconnected, "sin canal no conecta");
+    }
+
+    #[tokio::test]
+    async fn play_sound_only_relays_audio() {
+        let app = AppState::new(GameState::new(GameMode::Millonario, 15));
+        let before = serde_json::to_string(&*app.game.read().await).unwrap();
+        let mut rx = app.tx.subscribe();
+        let cmd: ClientCommand =
+            serde_json::from_str(r#"{"action":"play_sound","payload":{"sound":"play_applause"}}"#).unwrap();
+        app.apply(cmd).await.unwrap();
+        let msgs: Vec<String> = std::iter::from_fn(|| rx.try_recv().ok()).collect();
+        assert_eq!(msgs.last().unwrap(), r#"{"type":"audio","payload":{"sound":"play_applause"}}"#);
+        assert_eq!(serde_json::to_string(&*app.game.read().await).unwrap(), before, "no toca el estado");
+        assert!(app.apply(ClientCommand::PlaySound { sound: Sound::PlayTension }).await.is_err());
     }
 
     #[test]

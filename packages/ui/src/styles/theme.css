@@ -1,0 +1,140 @@
+/*
+ * Design system de Concursillo Studio (Tailwind v4).
+ *
+ * Lo importan el Control y el Editor:  @import "@concursillo/ui/theme.css";
+ * El Stage (OBS) NO lo usa: sus colores salen de los temas JSON (variables
+ * --stage-*), y el preflight de Tailwind no debe tocar su fondo transparente.
+ *
+ * Tailwind v4 se configura en CSS (no hace falta tailwind.config.js).
+ */
+@import "tailwindcss";
+/* Inter variable empaquetada con la app: funciona sin conexión (no Google Fonts). */
+@import "@fontsource-variable/inter";
+/* Outfit: fuente "display" (títulos, cifras grandes) con aire futurista/deportivo. */
+@import "@fontsource-variable/outfit";
+
+/* Escanear también los componentes compartidos (no están dentro de cada app). */
+@source "../";
+
+@theme {
+  --font-sans: "Inter Variable", system-ui, "Segoe UI Variable", "Segoe UI", ui-sans-serif, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Outfit Variable", "Inter Variable", system-ui, sans-serif;
+  --font-mono: "Cascadia Code", "JetBrains Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+
+  /* Fondo y superficies (escala zinc, más profunda que slate). */
+  --color-canvas: oklch(0.13 0.008 285);
+  --color-surface: oklch(0.18 0.01 285 / 0.78);
+  --color-surface-2: oklch(0.22 0.012 285);
+  --color-line: oklch(1 0 0 / 0.07);
+
+  /* Acento de marca: índigo → violeta. */
+  --color-brand-400: oklch(0.7 0.16 280);
+  --color-brand-500: oklch(0.6 0.21 280);
+  --color-brand-600: oklch(0.53 0.23 282);
+
+  /* Brillos (glows): sombras difusas de color para lo activo/importante. */
+  --shadow-glow-brand: 0 0 0 1px oklch(0.6 0.21 280 / 0.35), 0 0 28px -4px oklch(0.6 0.21 280 / 0.55);
+  --shadow-glow-amber: 0 0 0 1px oklch(0.8 0.16 80 / 0.35), 0 0 28px -4px oklch(0.8 0.16 80 / 0.5);
+  --shadow-glow-rose: 0 0 0 1px oklch(0.64 0.22 15 / 0.4), 0 0 30px -4px oklch(0.64 0.22 15 / 0.6);
+  --shadow-glow-emerald: 0 0 0 1px oklch(0.7 0.15 160 / 0.35), 0 0 26px -4px oklch(0.7 0.15 160 / 0.5);
+
+  --animate-pop: pop 0.35s cubic-bezier(0.2, 1.4, 0.4, 1);
+  --animate-flash: flash 0.8s ease-out;
+  --animate-fade-in: fade-in 0.25s ease-out;
+
+  @keyframes pop {
+    from { transform: scale(0.92); opacity: 0.4; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  @keyframes flash {
+    from { background-color: oklch(0.6 0.21 280 / 0.45); }
+    to { background-color: transparent; }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: none; }
+  }
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+  html,
+  body {
+    @apply bg-canvas text-zinc-100 antialiased;
+  }
+  body {
+    /* Halo de color muy sutil arriba: da profundidad sin distraer. */
+    background-image:
+      radial-gradient(1200px 500px at 10% -10%, oklch(0.6 0.21 280 / 0.12), transparent 60%),
+      radial-gradient(900px 400px at 100% 0%, oklch(0.55 0.2 300 / 0.08), transparent 60%);
+    background-attachment: fixed;
+  }
+  ::selection {
+    @apply bg-brand-500/40;
+  }
+  html {
+    /* Números tabulares y ligaduras de Inter más legibles en pantalla. */
+    font-feature-settings: "cv11", "ss01";
+  }
+  /*
+   * Scrollbars personalizadas (WebView2 = Chromium). Ojo: NO usar
+   * `scrollbar-color`/`scrollbar-width` aquí, porque en Chromium ≥121 anulan
+   * por completo estos estilos ::-webkit-scrollbar.
+   */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    border: 3px solid transparent;
+    border-radius: 9999px;
+    background-clip: padding-box;
+    background-color: oklch(0.4 0.02 285 / 0.7);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: oklch(0.6 0.21 280 / 0.75);
+  }
+  ::-webkit-scrollbar-thumb:active {
+    background-color: oklch(0.7 0.16 280);
+  }
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-button {
+    display: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/*
+ * Textura de ruido (grano) a opacidad 0.03 sobre toda la app: acabado más
+ * orgánico, menos "plano". SVG feTurbulence en línea, sin imágenes externas.
+ */
+@layer base {
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    background-size: 220px 220px;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+}

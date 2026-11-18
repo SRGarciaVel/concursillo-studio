@@ -1,5 +1,7 @@
 import { COMODINES, COMODIN_INFO } from "@concursillo/ui";
-import type { GameState } from "@concursillo/shared-types";
+import { motion, type TargetAndTransition } from "motion/react";
+import type { Comodin, GameState } from "@concursillo/shared-types";
+import { TimeUpFlash } from "./TimeUpFlash";
 
 /** Fila de los 4 comodines (los gastados aparecen tachados). */
 export function ComodinBar({ state }: { state: GameState }) {
@@ -57,7 +59,8 @@ function ChatVoteBars({ state }: { state: GameState }) {
               <span className="vote-answer">{answers[i]}</span>
             </div>
             <span className="vote-count">
-              {count}
+              {/* `key` por valor: cada voto nuevo hace "saltar" el número. */}
+              <span key={count} className={count > 0 ? "vote-num bump" : "vote-num"}>{count}</span>
               <small>{Math.round(pct)}%</small>
             </span>
           </div>
@@ -71,6 +74,14 @@ function ChatVoteBars({ state }: { state: GameState }) {
   );
 }
 
+/** Pose inicial de la entrada 3D de cada comodín. */
+const ENTRY: Record<Comodin, TargetAndTransition> = {
+  Chat: { opacity: 0, rotateX: -95, scale: 0.85, y: -60 },
+  Ruleta: { opacity: 0, rotateY: 180, scale: 0.4, y: 0 },
+  Llamada: { opacity: 0, scale: 0.55, y: -30 },
+  Sacrificio: { opacity: 0, scale: 0.55, y: -30 },
+};
+
 /** Capa sobre el stage mientras hay un comodín activo. */
 export function ComodinOverlay({ state }: { state: GameState }) {
   const comodin = state.active_comodin;
@@ -81,24 +92,54 @@ export function ComodinOverlay({ state }: { state: GameState }) {
   const expired = left === 0;
   const danger = left !== null && left > 0 && left <= 5;
 
-  return (
-    <div className={`comodin-overlay comodin-${comodin.toLowerCase()}${expired ? " expired" : ""}`} role="status">
-      <div className="comodin-card">
-        <div className="comodin-icon">{info.icon}</div>
-        <div className="comodin-title">{info.title}</div>
-        <div className="comodin-subtitle">{info.subtitle(limit)}</div>
-        {comodin === "Ruleta" && <Ruleta />}
-        {comodin === "Chat" && <ChatVoteBars state={state} />}
-        {left !== null && (
-          <div className={`comodin-countdown${danger ? " danger" : ""}`}>{expired ? "¡TIEMPO!" : left}</div>
-        )}
-        {left !== null && limit ? (
-          <div className="comodin-progress">
-            <div className="comodin-progress-bar" style={{ width: `${(left / limit) * 100}%` }} />
-          </div>
-        ) : null}
-        {state.timer_paused && <div className="comodin-paused">⏸ En pausa</div>}
+  const countdown =
+    left !== null ? <div className={`comodin-countdown${danger ? " danger" : ""}`}>{left}</div> : null;
+  const progress =
+    left !== null && limit ? (
+      <div className="comodin-progress">
+        <div className="comodin-progress-bar" style={{ width: `${(left / limit) * 100}%` }} />
       </div>
-    </div>
+    ) : null;
+
+  return (
+    <>
+      <div className={`comodin-overlay comodin-${comodin.toLowerCase()}${expired ? " expired" : ""}`} role="status">
+        <motion.div
+          className="comodin-card"
+          // Entrada 3D: el chat cae "abatiéndose" (flip X); la ruleta gira sobre Y con zoom; el resto, zoom.
+          initial={ENTRY[comodin]}
+          animate={{ opacity: 1, rotateX: 0, rotateY: 0, scale: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 170, damping: 17, mass: 0.9 }}
+          style={{ transformPerspective: 1400 }}
+        >
+          {comodin === "Chat" ? (
+            // Chat: una sola fila (icono · título · reloj) para dejar sitio a las barras.
+            <>
+              <div className="comodin-head">
+                <div className="comodin-icon">{info.icon}</div>
+                <div>
+                  <div className="comodin-title">{info.title}</div>
+                  <div className="comodin-subtitle">{info.subtitle(limit)}</div>
+                </div>
+                {countdown}
+              </div>
+              {progress}
+              <ChatVoteBars state={state} />
+            </>
+          ) : (
+            <>
+              <div className="comodin-icon">{info.icon}</div>
+              <div className="comodin-title">{info.title}</div>
+              <div className="comodin-subtitle">{info.subtitle(limit)}</div>
+              {comodin === "Ruleta" && <Ruleta />}
+              {countdown}
+              {progress}
+            </>
+          )}
+          {state.timer_paused && <div className="comodin-paused">⏸ En pausa</div>}
+        </motion.div>
+      </div>
+      {expired && <TimeUpFlash key={`comodin-${comodin}`} />}
+    </>
   );
 }

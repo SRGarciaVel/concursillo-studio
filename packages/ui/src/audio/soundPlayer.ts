@@ -9,7 +9,7 @@ const EXTENSIONS = ["mp3", "wav"] as const;
 /** Sonidos que suenan en bucle hasta que llega otro evento (o se para). */
 const LOOPING: ReadonlySet<Sound> = new Set<Sound>(["play_tension"]);
 
-export const ALL_SOUNDS: Sound[] = ["play_tension", "play_correct", "play_wrong", "play_win", "play_pass"];
+export const ALL_SOUNDS: Sound[] = ["play_tension", "play_correct", "play_wrong", "play_win", "play_pass", "play_drumroll", "play_applause"];
 
 type Logger = (message: string) => void;
 

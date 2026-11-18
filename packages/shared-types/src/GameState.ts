@@ -28,6 +28,11 @@ timer_paused: boolean, is_correct: boolean | null, streak: number,
  */
 theme: string, 
 /**
+ * Fondo 100% transparente en el stage (para superponerlo en OBS).
+ * Es configuración de emisión: sobrevive a Reset y a partidas nuevas.
+ */
+transparent_background: boolean, 
+/**
  * Estado del rosco (letras y contadores). `None` en modo Millonario.
  */
 rosco: RoscoState | null, 

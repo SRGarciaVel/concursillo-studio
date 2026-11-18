@@ -1,172 +1,344 @@
-/* Stage para OBS. Todos los colores y fuentes vienen del tema activo
-   (packages/themes/*.json), que se inyecta como variables CSS en :root.
-   Estos valores son solo el respaldo hasta que llega el primer estado. */
+/* Stage para OBS: la pantalla que ve la audiencia.
+   Colores y fuentes vienen del tema activo (packages/themes/*.json), que se
+   inyecta como variables CSS en :root. Estos valores son solo el respaldo
+   hasta que llega el primer estado.
+
+   Principios "broadcast":
+   - Fondo estático y sobrio (gradiente + viñeta). Nada que distraiga ni que
+     la compresión del stream convierta en ruido.
+   - Cajas de cristal sutiles con una línea fina que brilla con el color del tema.
+   - Texto siempre en peso ≥ 600 y con sombra: legible aunque el bitrate sea bajo.
+   - Modo transparente: sin fondo en absoluto, para superponerlo en OBS. */
 :root {
-  --stage-bg: transparent;
-  --stage-font: system-ui, sans-serif;
+  --stage-bg: #16171c;
+  --stage-vignette: rgba(0, 0, 0, 0.45);
+  --stage-edge-glow: none;
+  --stage-spotlight: rgba(255, 255, 255, 0.07);
+  --stage-font: "Outfit Variable", system-ui, sans-serif;
+  --stage-font-display: var(--stage-font);
   --stage-text: #ffffff;
-  --stage-box: rgba(10, 12, 40, 0.88);
-  --stage-border: #4c6ef5;
-  --stage-radius: 999px;
-  --stage-accent: #f59f00;
-  --stage-selected: #f59f00;
-  --stage-correct: #2b8a3e;
-  --stage-wrong: #c92a2a;
-  --stage-timer-track: rgba(255, 255, 255, 0.15);
-  --stage-timer: #4c6ef5;
-  --stage-timer-danger: #fa5252;
+  --stage-box: #16171c;
+  --stage-line: rgba(255, 255, 255, 0.14);
+  --stage-line-glow: transparent;
+  --stage-border: #6366f1;
+  --stage-radius: 16px;
+  --stage-accent: #f5a524;
+  --stage-selected: #e8891c;
+  --stage-correct: #2f9e5a;
+  --stage-wrong: #c8382f;
+  --stage-timer-track: rgba(255, 255, 255, 0.12);
+  --stage-timer: #818cf8;
+  --stage-timer-danger: #f8564b;
   --stage-glow: none;
+  /* Opacidad del cristal. Sube en modo transparente: sin fondo detrás, la caja
+     tiene que aguantar sola la legibilidad sobre gameplay o webcam. */
+  --glass-mix: 64%;
+  --glass: color-mix(in srgb, var(--stage-box) var(--glass-mix), transparent);
   font-family: var(--stage-font);
   color: var(--stage-text);
+  -webkit-font-smoothing: antialiased;
 }
-html, body { margin: 0; background: var(--stage-bg); min-height: 100vh; }
-.stage {
-  min-height: 100vh; box-sizing: border-box; padding: 48px;
-  display: flex; flex-direction: column; justify-content: flex-end; gap: 24px;
-}
-.waiting {
-  margin: auto; font-size: 3rem; font-weight: 700;
-  background: var(--stage-box); padding: 24px 48px; border-radius: 16px;
-  border: 3px solid var(--stage-border); box-shadow: var(--stage-glow);
-}
-.question, .answer {
-  background: var(--stage-box); border: 3px solid var(--stage-border);
-  border-radius: var(--stage-radius); box-shadow: var(--stage-glow);
-  padding: 20px 40px; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
-}
-.question { font-size: 2.6rem; font-weight: 700; text-align: center; }
-.answers { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.answer { font-size: 2rem; transition: background 0.3s; }
-.letter { color: var(--stage-accent); font-weight: 800; }
-.answer.selected { background: var(--stage-selected); }
-.answer.selected .letter, .answer.correct .letter, .answer.wrong .letter { color: var(--stage-text); }
-.answer.correct { background: var(--stage-correct); }
-.answer.wrong { background: var(--stage-wrong); }
-.banner { align-self: center; font-size: 2.4rem; font-weight: 800; padding: 12px 40px; border-radius: 12px; }
-.banner.ok { background: var(--stage-correct); }
-.banner.bad { background: var(--stage-wrong); }
+/* El fondo lo pinta .stage-backdrop (App.tsx): html/body nunca tienen color propio. */
+html, body { margin: 0; background: transparent; min-height: 100vh; overflow: hidden; }
 
-/* Reloj circular */
-.timer { position: relative; width: 140px; height: 140px; align-self: center; }
-.timer svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-.timer circle { fill: var(--stage-box); stroke-width: 10; }
+/* ───────────── Modo transparente (OBS) ───────────── */
+:root[data-transparent="true"] { --glass-mix: 86%; }
+:root[data-transparent="true"],
+:root[data-transparent="true"] body { background: transparent !important; }
+
+/* ───────────── Fondo (modo normal) ───────────── */
+.stage-backdrop {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: var(--stage-bg);
+  box-shadow: var(--stage-edge-glow);
+  animation: backdrop-in 0.6s ease-out;
+}
+/* Viñeta: bordes oscurecidos que centran la mirada en la pregunta. */
+.stage-backdrop::after {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 75% 70% at 50% 48%, transparent 45%, var(--stage-vignette) 100%);
+}
+@keyframes backdrop-in { from { opacity: 0; } }
+
+/* ───────────── Marca de agua ───────────── */
+.watermark {
+  position: fixed; right: 24px; bottom: 16px; z-index: 2; pointer-events: none;
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--stage-font); font-size: 15px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--stage-text); opacity: 0.38;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+.watermark svg { width: 20px; height: 20px; color: var(--stage-accent); filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6)); }
+
+/* ───────────── Lienzo ───────────── */
+.stage {
+  position: relative; z-index: 1;
+  min-height: 100vh; box-sizing: border-box; padding: 48px 56px 64px;
+  display: flex; flex-direction: column; justify-content: flex-end; gap: 22px;
+}
+
+/* Cristal base: pregunta, respuestas, pastillas y tarjetas. */
+.glass, .question, .answer, .waiting, .progress-pill, .comodin-bar, .banner, .rosco-center {
+  background: var(--glass);
+  backdrop-filter: blur(14px) saturate(1.25);
+  -webkit-backdrop-filter: blur(14px) saturate(1.25);
+  border: 1.5px solid var(--stage-line);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 0 18px var(--stage-line-glow),
+    0 14px 40px rgba(0, 0, 0, 0.38);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
+}
+
+.waiting {
+  margin: auto; padding: 22px 52px; border-radius: var(--stage-radius);
+  font-family: var(--stage-font-display); font-size: 2.6rem; font-weight: 700;
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+
+/* ───────────── Pregunta y respuestas (Millonario) ───────────── */
+.question-block { display: flex; flex-direction: column; gap: 18px; }
+.question {
+  position: relative; border-radius: var(--stage-radius);
+  padding: 28px 56px; text-align: center;
+  font-size: 2.55rem; font-weight: 650; line-height: 1.22; letter-spacing: -0.005em;
+  text-wrap: balance;
+}
+/* Fino filo de luz en la parte superior de la pregunta. */
+.question::before {
+  content: ""; position: absolute; left: 12%; right: 12%; top: -1px; height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--stage-accent), transparent);
+  opacity: 0.75;
+}
+.answers { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; }
+.answer {
+  display: flex; align-items: center; gap: 18px; min-height: 76px; box-sizing: border-box;
+  border-radius: var(--stage-radius); padding: 14px 28px 14px 16px;
+  font-size: 2rem; font-weight: 650; line-height: 1.15;
+  transition: background 0.45s ease, border-color 0.45s ease, box-shadow 0.45s ease, transform 0.3s ease;
+}
+.letter {
+  flex: none; display: grid; place-items: center; width: 52px; height: 52px; border-radius: calc(var(--stage-radius) * 0.7);
+  font-family: var(--stage-font-display); font-size: 1.75rem; font-weight: 700; line-height: 1;
+  color: var(--stage-accent);
+  background: color-mix(in srgb, var(--stage-accent) 12%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--stage-accent) 45%, transparent);
+}
+.answer-text { min-width: 0; }
+.answer.selected { background: color-mix(in srgb, var(--stage-selected) 88%, transparent); border-color: color-mix(in srgb, #fff 45%, var(--stage-selected)); }
+.answer.correct { background: color-mix(in srgb, var(--stage-correct) 92%, transparent); border-color: color-mix(in srgb, #fff 40%, var(--stage-correct)); }
+.answer.wrong { background: color-mix(in srgb, var(--stage-wrong) 92%, transparent); border-color: color-mix(in srgb, #fff 35%, var(--stage-wrong)); }
+.answer.selected .letter, .answer.correct .letter, .answer.wrong .letter {
+  color: #fff; background: rgba(0, 0, 0, 0.18); border-color: rgba(255, 255, 255, 0.45);
+}
+/* Al revelar: la correcta "late" una vez con un halo; la fallada tiembla. */
+.answer.correct {
+  animation: reveal 0.7s ease-out;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 28px color-mix(in srgb, var(--stage-correct) 55%, transparent), 0 14px 40px rgba(0, 0, 0, 0.38);
+}
+.answer.wrong { animation: shake 0.45s ease-in-out; }
+@keyframes reveal { 40% { transform: scale(1.03); } }
+@keyframes shake {
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+.banner {
+  align-self: center; padding: 12px 44px; border-radius: var(--stage-radius);
+  font-family: var(--stage-font-display); font-size: 2.2rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase;
+}
+.banner.ok { background: color-mix(in srgb, var(--stage-correct) 90%, transparent); }
+.banner.bad { background: color-mix(in srgb, var(--stage-wrong) 90%, transparent); }
+.banner-sub { font-family: var(--stage-font); font-weight: 600; font-size: 0.62em; text-transform: none; letter-spacing: 0; }
+.retired { text-align: center; }
+.retired-sub { font-family: var(--stage-font); font-size: 1.5rem; font-weight: 600; margin-top: 8px; text-transform: none; letter-spacing: 0; }
+
+/* ───────────── Cabecera: comodines, reloj, progreso ───────────── */
+.stage-top { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.stage-top .timer { align-self: auto; }
+.progress-pill, .comodin-bar {
+  border-radius: 999px; padding: 10px 24px; min-width: 220px; text-align: center;
+  font-family: var(--stage-font-display); font-size: 1.45rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+.progress-pill .net { color: var(--stage-accent); }
+.comodin-bar { display: flex; gap: 14px; justify-content: center; }
+.comodin-chip { font-size: 1.9rem; position: relative; transition: opacity 0.3s, filter 0.3s; }
+.comodin-chip.status-used { opacity: 0.28; filter: grayscale(1); }
+.comodin-chip.status-used::after {
+  content: ""; position: absolute; left: -10%; right: -10%; top: 50%; height: 3px; border-radius: 2px;
+  background: var(--stage-wrong); transform: rotate(-35deg);
+}
+.comodin-chip.status-active { animation: pulse 0.9s ease-in-out infinite; }
+
+/* ───────────── Reloj circular ───────────── */
+.timer { position: relative; width: 136px; height: 136px; align-self: center; }
+.timer svg { width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
+.timer circle { fill: var(--glass); stroke-width: 7; }
 .timer-track { stroke: var(--stage-timer-track); }
 .timer-bar {
   fill: none !important; stroke: var(--stage-timer); stroke-linecap: round;
-  /* El backend manda un estado por segundo: la transición lineal de 1 s lo suaviza. */
-  transition: stroke-dashoffset 1s linear, stroke 0.3s;
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--stage-timer) 55%, transparent));
+  transition: stroke 0.3s; /* el trazo lo anima anime.js */
 }
 .timer-value {
   position: absolute; inset: 0; display: grid; place-items: center;
-  font-size: 3rem; font-weight: 800; font-variant-numeric: tabular-nums;
+  font-family: var(--stage-font-display); font-size: 3rem; font-weight: 700; font-variant-numeric: tabular-nums;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
 }
-.timer.danger .timer-bar { stroke: var(--stage-timer-danger); }
-.timer.danger .timer-value { color: var(--stage-timer-danger); animation: pulse 1s ease-in-out infinite; }
+.timer-num { display: inline-block; }
+.timer.danger .timer-bar { stroke: var(--stage-timer-danger); filter: drop-shadow(0 0 8px color-mix(in srgb, var(--stage-timer-danger) 70%, transparent)); }
+.timer.danger .timer-value { color: var(--stage-timer-danger); }
 .timer.paused .timer-bar { opacity: 0.5; }
 @keyframes pulse { 50% { transform: scale(1.12); } }
 
 /* ───────────── Rosco ───────────── */
-.rosco-stage { justify-content: center; align-items: center; position: relative; }
-.rosco-timer { position: absolute; top: 32px; right: 32px; }
+.rosco-stage { justify-content: center; align-items: center; }
+.rosco-timer { position: absolute; top: 32px; right: 40px; }
 .rosco-timer .timer { width: 120px; height: 120px; }
 .rosco-ring {
-  position: relative; aspect-ratio: 1; width: min(calc(100vh - 96px), calc(100vw - 96px));
+  position: relative; aspect-ratio: 1; width: min(calc(100vh - 110px), calc(100vw - 110px));
 }
-.rosco-letter {
-  position: absolute; transform: translate(-50%, -50%);
-  width: 9.5%; aspect-ratio: 1; border-radius: 50%;
-  display: grid; place-items: center;
-  font-size: clamp(1rem, 3.4vmin, 2.4rem); font-weight: 800;
-  background: var(--stage-pending, #5c6170); color: var(--stage-text);
-  border: 3px solid var(--stage-border); box-shadow: var(--stage-glow);
-  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.5);
-  transition: background 0.35s, transform 0.35s, box-shadow 0.35s;
+/* Foco (spotlight) detrás del círculo: el rosco es el protagonista absoluto. */
+.rosco-ring::before {
+  content: ""; position: absolute; inset: -22%; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, var(--stage-spotlight) 0%, color-mix(in srgb, var(--stage-spotlight) 40%, transparent) 38%, transparent 66%);
 }
-.rosco-letter.status-correct { background: var(--stage-correct); }
-.rosco-letter.status-wrong { background: var(--stage-wrong); }
-.rosco-letter.status-passed { background: var(--stage-passed, #e0a800); }
-.rosco-letter.current {
-  border-color: var(--stage-accent); z-index: 1;
-  animation: rosco-pulse 1.1s ease-in-out infinite;
+:root[data-transparent="true"] .rosco-ring::before { display: none; }
+
+/* Rosco en SVG (Rosco.tsx). viewBox 1000×1000; colores del tema. */
+.rosco-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.rosco-track { fill: none; stroke: color-mix(in srgb, var(--stage-text) 10%, transparent); stroke-width: 2; }
+/* El muelle (anime.js) escala el cuerpo de la letra desde su centro. */
+.rl-body { transform-box: fill-box; transform-origin: center; }
+.rl-disc {
+  fill: var(--stage-pending, #363944);
+  stroke: color-mix(in srgb, var(--stage-text) 16%, transparent); stroke-width: 3;
+  transition: fill 0.4s ease, stroke 0.4s ease;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
 }
-@keyframes rosco-pulse {
-  0%, 100% { transform: translate(-50%, -50%) scale(1.12); box-shadow: 0 0 0 0 var(--stage-accent); }
-  50% { transform: translate(-50%, -50%) scale(1.25); box-shadow: 0 0 22px 6px var(--stage-accent); }
+.rl-shine { fill: url(#rl-shine); pointer-events: none; }
+.rl-text {
+  fill: color-mix(in srgb, var(--stage-text) 72%, transparent);
+  font-family: var(--stage-font-display); font-weight: 700; font-size: 46px;
+  transition: fill 0.4s ease;
 }
+.rl.status-correct .rl-disc { fill: var(--stage-correct); stroke: color-mix(in srgb, #fff 30%, transparent); }
+.rl.status-wrong .rl-disc { fill: var(--stage-wrong); stroke: color-mix(in srgb, #fff 26%, transparent); }
+.rl.status-passed .rl-disc { fill: var(--stage-passed, #d9a21b); stroke: color-mix(in srgb, #fff 30%, transparent); }
+.rl.status-correct .rl-text, .rl.status-wrong .rl-text, .rl.status-passed .rl-text { fill: #fff; }
+
+/* Letra actual: disco de acento, halo suave que respira y un único anillo fino. */
+.rl.current .rl-disc {
+  fill: var(--stage-accent); stroke: rgba(255, 255, 255, 0.7); stroke-width: 3;
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--stage-accent) 55%, transparent));
+}
+.rl.current .rl-text { fill: var(--stage-box); }
+.rl.current .rl-body { animation: rl-breathe 2.4s ease-in-out infinite; }
+.rl-glow {
+  fill: color-mix(in srgb, var(--stage-accent) 16%, transparent);
+  transform-box: fill-box; transform-origin: center;
+  animation: rl-glow 2.4s ease-in-out infinite;
+}
+.rl-ring {
+  fill: none; stroke: var(--stage-accent); stroke-width: 2.5;
+  transform-box: fill-box; transform-origin: center;
+  animation: rl-ring 2.4s ease-in-out infinite;
+}
+@keyframes rl-breathe { 50% { transform: scale(1.05); } }
+@keyframes rl-glow { 0%, 100% { opacity: 0.55; transform: scale(0.96); } 50% { opacity: 1; transform: scale(1.06); } }
+@keyframes rl-ring { 0%, 100% { opacity: 0.35; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.07); } }
+
 .rosco-center {
-  position: absolute; inset: 17%; border-radius: 50%;
+  position: absolute; inset: 16.5%; border-radius: 50%;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2vmin;
-  text-align: center; padding: 4%;
-  background: var(--stage-box); border: 3px solid var(--stage-border); box-shadow: var(--stage-glow);
+  text-align: center; padding: 5%;
 }
-.rosco-hint { font-size: clamp(1rem, 3vmin, 2.2rem); font-weight: 800; color: var(--stage-accent); text-transform: uppercase; }
-.rosco-question { font-size: clamp(1rem, 3.2vmin, 2.3rem); font-weight: 700; line-height: 1.25; }
-.rosco-options { display: grid; grid-template-columns: 1fr 1fr; gap: 1vmin 3vmin; font-size: clamp(0.9rem, 2.3vmin, 1.6rem); }
+.rosco-card { display: flex; flex-direction: column; align-items: center; gap: 2vmin; }
+.rosco-hint {
+  font-family: var(--stage-font-display); font-size: clamp(1rem, 3vmin, 2.2rem); font-weight: 700;
+  color: var(--stage-accent); text-transform: uppercase; letter-spacing: 0.06em;
+}
+.rosco-question { font-size: clamp(1rem, 3.2vmin, 2.3rem); font-weight: 650; line-height: 1.25; text-wrap: balance; }
+.rosco-options { display: grid; grid-template-columns: 1fr 1fr; gap: 1vmin 3vmin; font-size: clamp(0.95rem, 2.3vmin, 1.6rem); font-weight: 600; }
 .rosco-option { text-align: left; }
-.rosco-result { font-size: clamp(1.4rem, 4.5vmin, 3rem); font-weight: 800; padding: 1vmin 3vmin; border-radius: 12px; }
+.rosco-option .opt { font-family: var(--stage-font-display); color: var(--stage-accent); font-weight: 700; margin-right: 0.4em; }
+.rosco-result {
+  font-family: var(--stage-font-display); font-size: clamp(1.4rem, 4.5vmin, 3rem); font-weight: 700;
+  padding: 1vmin 3vmin; border-radius: var(--stage-radius); text-transform: uppercase; letter-spacing: 0.03em;
+}
 .rosco-result.ok { background: var(--stage-correct); }
 .rosco-result.bad { background: var(--stage-wrong); }
-.rosco-counters { display: flex; gap: 2.5vmin; font-size: clamp(1rem, 2.8vmin, 2rem); font-weight: 800; font-variant-numeric: tabular-nums; }
-.count { padding: 0.3vmin 1.6vmin; border-radius: 999px; }
-.count.correct { background: var(--stage-correct); }
-.count.wrong { background: var(--stage-wrong); }
-.count.pending { background: var(--stage-pending, #5c6170); }
-
-/* ───────────── Millonario: cabecera, comodines, plantarse ───────────── */
-.stage-top { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
-.stage-top .timer { align-self: auto; }
-.progress-pill, .comodin-bar {
-  background: var(--stage-box); border: 3px solid var(--stage-border); box-shadow: var(--stage-glow);
-  border-radius: 999px; padding: 10px 22px; font-size: 1.5rem; font-weight: 700; min-width: 220px; text-align: center;
+.rosco-counters {
+  display: flex; gap: 1.6vmin;
+  font-family: var(--stage-font-display); font-size: clamp(1rem, 2.6vmin, 1.9rem); font-weight: 700; font-variant-numeric: tabular-nums;
 }
-.comodin-bar { display: flex; gap: 12px; justify-content: center; }
-.comodin-chip { font-size: 2rem; position: relative; transition: opacity 0.3s, filter 0.3s; }
-.comodin-chip.status-used { opacity: 0.3; filter: grayscale(1); }
-.comodin-chip.status-used::after {
-  content: ""; position: absolute; left: -10%; right: -10%; top: 50%; height: 4px;
-  background: var(--stage-wrong); transform: rotate(-35deg);
+.count {
+  display: inline-flex; align-items: center; gap: 0.5em; padding: 0.35vmin 1.6vmin; border-radius: 999px;
+  background: rgba(0, 0, 0, 0.22); border: 1.5px solid currentColor;
 }
-.comodin-chip.status-active { animation: pulse 0.9s ease-in-out infinite; }
-.retired { text-align: center; }
-.retired-sub { font-size: 1.6rem; font-weight: 600; margin-top: 8px; }
-.banner-sub { font-weight: 600; font-size: 0.7em; }
+.count::before { content: ""; width: 0.55em; height: 0.55em; border-radius: 50%; background: currentColor; }
+.count span { color: var(--stage-text); }
+.count.correct { color: color-mix(in srgb, var(--stage-correct) 80%, #fff); }
+.count.wrong { color: color-mix(in srgb, var(--stage-wrong) 80%, #fff); }
+.count.pending { color: color-mix(in srgb, var(--stage-text) 45%, transparent); }
 
-/* Overlay del comodín: capa semitransparente + tarjeta arriba. */
+/* ───────────── Overlay del comodín: tarjeta de cristal arriba ─────────────
+   No tapa la escena con un bloque sólido: solo un leve oscurecido superior. */
 .comodin-overlay {
-  position: fixed; inset: 0; z-index: 10;
-  display: flex; justify-content: center; align-items: flex-start; padding-top: 6vh;
-  background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(2px);
+  position: fixed; inset: 0; z-index: 10; pointer-events: none;
+  display: flex; justify-content: center; align-items: flex-start; padding-top: 3.5vh;
+  background: radial-gradient(ellipse 70% 45% at 50% 0%, rgba(0, 0, 0, 0.3), transparent 70%);
   animation: overlay-in 0.35s ease-out;
 }
 @keyframes overlay-in { from { opacity: 0; } to { opacity: 1; } }
 .comodin-card {
-  min-width: min(70vw, 900px); padding: 28px 48px; text-align: center;
-  background: var(--stage-box); border: 4px solid var(--stage-accent); border-radius: 24px;
-  box-shadow: var(--stage-glow), 0 20px 60px rgba(0, 0, 0, 0.6);
-  animation: card-in 0.45s cubic-bezier(0.2, 1.4, 0.4, 1);
+  min-width: min(62vw, 820px); padding: 22px 40px; text-align: center;
+  background: var(--glass);
+  backdrop-filter: blur(18px) saturate(1.3);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  border: 1.5px solid var(--stage-line);
+  border-radius: calc(var(--stage-radius) * 1.5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 22px var(--stage-line-glow), 0 18px 50px rgba(0, 0, 0, 0.45);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
+  /* La entrada 3D la hace Motion (Comodines.tsx). */
 }
-@keyframes card-in { from { transform: translateY(-40px) scale(0.92); } to { transform: none; } }
-.comodin-icon { font-size: 4rem; line-height: 1; }
-.comodin-title { font-size: 3rem; font-weight: 800; text-transform: uppercase; color: var(--stage-accent); letter-spacing: 0.03em; }
-.comodin-subtitle { font-size: 1.8rem; font-weight: 600; margin-top: 4px; }
+.comodin-icon { font-size: 3.2rem; line-height: 1; }
+.comodin-title {
+  font-family: var(--stage-font-display); font-size: 2.3rem; font-weight: 700;
+  text-transform: uppercase; color: var(--stage-accent); letter-spacing: 0.05em;
+}
+.comodin-subtitle { font-size: 1.35rem; font-weight: 600; margin-top: 2px; opacity: 0.92; }
 .comodin-countdown {
-  font-size: 9rem; font-weight: 900; line-height: 1.05; margin-top: 8px;
+  font-family: var(--stage-font-display); font-size: 6.5rem; font-weight: 700; line-height: 1; margin-top: 6px;
   font-variant-numeric: tabular-nums; text-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
 }
 .comodin-countdown.danger { color: var(--stage-timer-danger); animation: pulse 1s ease-in-out infinite; }
-.comodin-progress { height: 12px; border-radius: 999px; background: var(--stage-timer-track); overflow: hidden; margin-top: 12px; }
+.comodin-progress { height: 6px; border-radius: 999px; background: rgba(255, 255, 255, 0.1); overflow: hidden; margin-top: 12px; }
 .comodin-progress-bar { height: 100%; background: var(--stage-timer); transition: width 1s linear; }
-.comodin-paused { margin-top: 10px; font-size: 1.4rem; opacity: 0.8; }
-/* Tiempo agotado: la tarjeta parpadea hasta que el presentador cierra el comodín. */
-.comodin-overlay.expired .comodin-card { border-color: var(--stage-timer-danger); animation: blink 0.6s steps(2, start) infinite; }
-.comodin-overlay.expired .comodin-countdown { color: var(--stage-timer-danger); font-size: 7rem; }
-@keyframes blink { to { visibility: hidden; } }
+.comodin-paused { margin-top: 8px; font-size: 1.2rem; opacity: 0.8; }
+/* Tiempo agotado: la tarjeta queda con borde rojo y el reloj a 0 hasta que el presentador la cierre. */
+.comodin-overlay.expired .comodin-card {
+  border-color: var(--stage-timer-danger);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 18px 50px rgba(0, 0, 0, 0.45),
+    0 0 26px 2px color-mix(in srgb, var(--stage-timer-danger) 45%, transparent);
+}
+.comodin-overlay.expired .comodin-countdown { color: var(--stage-timer-danger); }
+.comodin-overlay.expired .comodin-progress-bar { background: var(--stage-timer-danger); }
+
+/* Comodín del chat: tarjeta compacta en una fila (icono · título · reloj). */
+.comodin-chat .comodin-card { min-width: min(54vw, 720px); padding: 16px 26px 18px; }
+.comodin-head { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 18px; text-align: left; }
+.comodin-head .comodin-icon { font-size: 2.6rem; }
+.comodin-head .comodin-title { font-size: 1.65rem; }
+.comodin-head .comodin-subtitle { font-size: 1.1rem; margin: 0; }
+.comodin-head .comodin-countdown { font-size: 3.4rem; margin: 0; min-width: 2.2ch; text-align: right; }
 
 /* Ruleta: rueda conic-gradient girando + puntero. */
 .ruleta { position: relative; width: 280px; height: 280px; margin: 16px auto 0; }
 .ruleta-wheel {
   width: 100%; height: 100%; border-radius: 50%; position: relative;
-  border: 6px solid var(--stage-accent); box-shadow: var(--stage-glow);
+  border: 5px solid var(--stage-accent); box-shadow: 0 0 22px var(--stage-line-glow);
   background: conic-gradient(
     var(--stage-correct) 0 12.5%, var(--stage-selected) 0 25%, var(--stage-wrong) 0 37.5%, var(--stage-border) 0 50%,
     var(--stage-correct) 0 62.5%, var(--stage-selected) 0 75%, var(--stage-wrong) 0 87.5%, var(--stage-border) 0 100%);
@@ -174,7 +346,7 @@ html, body { margin: 0; background: var(--stage-bg); min-height: 100vh; }
 }
 .ruleta-label {
   position: absolute; left: 50%; top: 50%; width: 2rem; margin: -1rem 0 0 -1rem;
-  font-size: 2rem; font-weight: 900; transform-origin: center;
+  font-family: var(--stage-font-display); font-size: 2rem; font-weight: 700; transform-origin: center;
 }
 .ruleta-pointer {
   position: absolute; top: -14px; left: 50%; transform: translateX(-50%); z-index: 1;
@@ -182,42 +354,103 @@ html, body { margin: 0; background: var(--stage-bg); min-height: 100vh; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Votos del chat: 4 barras horizontales en el overlay del comodín del chat. */
-.vote-bars { display: grid; gap: 12px; margin-top: 18px; text-align: left; }
+/* Votos del chat: 4 barras finas dentro de la tarjeta de cristal. */
+.vote-bars { display: grid; gap: 7px; margin-top: 12px; text-align: left; }
 .vote-row {
-  display: grid; grid-template-columns: 3.2rem 1fr 5.5rem; align-items: center; gap: 14px;
-  transition: transform 0.3s;
+  display: grid; grid-template-columns: 2.1rem 1fr 4.6rem; align-items: center; gap: 10px;
+  transition: transform 0.4s cubic-bezier(0.22, 1.2, 0.36, 1);
 }
 .vote-letter {
-  width: 3.2rem; height: 3.2rem; border-radius: 50%; display: grid; place-items: center;
-  font-size: 1.8rem; font-weight: 900; color: var(--stage-accent);
-  border: 3px solid var(--stage-border); background: var(--stage-box);
+  width: 2.1rem; height: 2.1rem; border-radius: 50%; display: grid; place-items: center;
+  font-family: var(--stage-font-display); font-size: 1.1rem; font-weight: 700; color: var(--stage-accent);
+  border: 1.5px solid color-mix(in srgb, var(--stage-accent) 45%, transparent);
+  background: rgba(0, 0, 0, 0.25);
 }
 .vote-track {
-  position: relative; height: 3.2rem; border-radius: 999px; overflow: hidden;
-  background: var(--stage-timer-track); border: 2px solid var(--stage-border);
+  position: relative; height: 2.1rem; border-radius: 999px; overflow: hidden;
+  background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.14);
 }
 .vote-fill {
-  position: absolute; inset: 0 auto 0 0; background: var(--stage-border);
-  transition: width 0.25s ease-out, background 0.3s;
+  position: absolute; inset: 0 auto 0 0;
+  background: color-mix(in srgb, var(--stage-border) 70%, transparent);
+  background-image: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.16));
+  transition: width 0.7s cubic-bezier(0.22, 1.2, 0.36, 1), background 0.4s ease;
 }
 .vote-answer {
-  position: relative; display: block; padding: 0 20px; line-height: 3rem;
-  font-size: 1.5rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+  position: relative; display: block; padding: 0 14px; line-height: 2rem;
+  font-size: 1.1rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
 }
-.vote-count { font-size: 2.2rem; font-weight: 900; font-variant-numeric: tabular-nums; text-align: right; line-height: 1; }
-.vote-count small { display: block; font-size: 0.9rem; font-weight: 600; opacity: 0.8; }
-/* La más votada brilla: color de acierto, halo y un pequeño zoom. */
-.vote-row.leader { transform: scale(1.03); }
-.vote-row.leader .vote-fill { background: var(--stage-correct); }
+.vote-count {
+  display: flex; align-items: baseline; justify-content: flex-end; gap: 6px;
+  font-family: var(--stage-font-display); font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1;
+}
+.vote-count small { font-family: var(--stage-font); font-size: 0.8rem; font-weight: 600; opacity: 0.75; }
+/* La más votada destaca: color de acierto, halo suave y un pequeño zoom. */
+.vote-row.leader { transform: scale(1.02); }
+.vote-row.leader .vote-fill { background-color: color-mix(in srgb, var(--stage-correct) 85%, transparent); }
 .vote-row.leader .vote-track {
-  border-color: var(--stage-accent);
-  box-shadow: 0 0 18px 2px var(--stage-accent);
-  animation: leader-glow 1.4s ease-in-out infinite;
+  border-color: color-mix(in srgb, var(--stage-accent) 70%, transparent);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--stage-accent) 45%, transparent);
 }
 .vote-row.leader .vote-letter { background: var(--stage-accent); color: var(--stage-box); border-color: var(--stage-accent); }
-@keyframes leader-glow { 50% { box-shadow: 0 0 30px 6px var(--stage-accent); } }
-.vote-total { text-align: center; font-size: 1.2rem; opacity: 0.85; }
-/* Con barras el número gigante del reloj se reduce para dejar sitio. */
-.comodin-chat .comodin-countdown { font-size: 6rem; }
+.vote-row.leader .vote-fill::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.28) 50%, transparent 80%);
+  background-size: 200% 100%; animation: shimmer 2.2s linear infinite;
+}
+@keyframes shimmer { from { background-position: 150% 0; } to { background-position: -50% 0; } }
+.vote-total { text-align: center; font-size: 0.95rem; opacity: 0.8; margin-top: 2px; }
+.vote-num { display: inline-block; }
+.vote-num.bump { animation: bump 0.35s ease-out; }
+@keyframes bump {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.3); color: var(--stage-accent); }
+  100% { transform: scale(1); }
+}
+
+/* ───────────── «¡TIEMPO!» ─────────────
+   Zoom de entrada + destello rojo, aguanta y se desvanece a los 3 s. */
+.timeup-flash {
+  position: fixed; inset: 0; z-index: 30; pointer-events: none;
+  display: grid; place-items: center;
+  animation: timeup-hold 3s ease-in forwards;
+}
+.timeup-burst {
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--stage-timer-danger) 50%, transparent) 0%, color-mix(in srgb, var(--stage-timer-danger) 16%, transparent) 35%, transparent 70%);
+  animation: timeup-burst 0.9s ease-out forwards;
+}
+.timeup-text {
+  position: relative;
+  font-family: var(--stage-font-display); font-size: 10rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 0 22px var(--stage-timer-danger), 0 0 50px color-mix(in srgb, var(--stage-timer-danger) 60%, transparent), 0 8px 30px rgba(0, 0, 0, 0.6);
+  animation: timeup-zoom 0.55s cubic-bezier(0.15, 1.6, 0.35, 1) both, timeup-shake 0.4s 0.55s ease-in-out;
+}
+@keyframes timeup-zoom {
+  from { transform: scale(2.6); opacity: 0; filter: blur(10px); }
+  to { transform: scale(1); opacity: 1; filter: none; }
+}
+@keyframes timeup-shake {
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+@keyframes timeup-burst {
+  0% { opacity: 0; transform: scale(0.4); }
+  25% { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.6); }
+}
+@keyframes timeup-hold {
+  0%, 75% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .answer.correct, .answer.wrong, .rl-body, .rl-glow, .rl-ring, .stage-backdrop,
+  .vote-fill, .vote-fill::after, .vote-num.bump, .comodin-chip, .comodin-countdown,
+  .timeup-text, .timeup-burst {
+    animation: none !important; transition: none !important;
+  }
+  .timeup-flash { animation: timeup-hold 3s steps(1, end) forwards; }
+}

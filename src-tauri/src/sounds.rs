@@ -268,7 +268,7 @@ mod tests {
     fn list_reports_missing_sounds() {
         let (base, dir, defaults) = dirs("list");
         let list = dir.list(Some(&defaults));
-        assert_eq!(list.len(), 5);
+        assert_eq!(list.len(), Sound::ALL.len());
         assert!(list.iter().all(|i| i.file.is_none() && !i.custom && i.has_default));
         let _ = fs::remove_dir_all(base);
     }
