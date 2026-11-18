@@ -1,0 +1,437 @@
+[
+  {
+    "id": "fgc-mil-001",
+    "mode": "Millonario",
+    "category": "Historia FGC",
+    "difficulty": "Easy",
+    "question": "¿En qué año ocurrió el legendario «EVO Moment 37» entre Daigo Umehara y Justin Wong?",
+    "answers": [
+      "2002",
+      "2004",
+      "2006",
+      "2008"
+    ],
+    "correct": 1,
+    "meta": null
+  },
+  {
+    "id": "fgc-mil-002",
+    "mode": "Millonario",
+    "category": "Historia FGC",
+    "difficulty": "Easy",
+    "question": "¿En qué juego se produjo el «EVO Moment 37»?",
+    "answers": [
+      "Street Fighter II Turbo",
+      "Street Fighter Alpha 3",
+      "Street Fighter IV",
+      "Street Fighter III: 3rd Strike"
+    ],
+    "correct": 3,
+    "meta": null
+  },
+  {
+    "id": "fgc-mil-003",
+    "mode": "Millonario",
+    "category": "Jugadores Legendarios",
+    "difficulty": "Easy",
+    "question": "¿Con qué apodo se conoce en Occidente al japonés Daigo Umehara?",
+    "answers": [
+      "The Machine",
+      "The Professor",
+      "The Phoenix",
+      "The Beast"
+    ],
+    "correct": 3,
+    "meta": null
+  },
+  {
+    "id": "fgc-mil-004",
+    "mode": "Millonario",
+    "category": "Curiosidades",
+    "difficulty": "Easy",
+    "question": "El famoso «Wombo Combo» de 2008 se hizo viral en un partido de dobles de…",
+    "answers": [
+      "Super Smash Bros. 64",
+      "Super Smash Bros. Brawl",
+      "Super Smash Bros. Melee",
+      "Super Smash Bros. for Wii U"
+    ],
+    "correct": 2,
+    "meta": null
+  },
+  {
+    "id": "fgc-mil-005",
+    "mode": "Millonario",
+    "category": "Historia FGC",
+    "difficulty": "Easy",
+    "question": "Según su productor, los combos nacieron como un error de programación en…",
+    "answers": [
+      "Street Fighter II",
+      "Mortal Kombat",
+      "Fatal Fury",
+      "Art of Fighting"
+    ],
+    "correct": 0,
+    "meta": null
+  },
+  {
+    "id": "fgc-mil-006",
+    "mode": "Millonario",
+    "category": "Escena Latinoamericana",
+    "difficulty": "Medium",
+    "question": "¿De qué país es Gonzalo «ZeRo» Barrios, campeón de Super Smash Bros. for Wii U en EVO 2015?",
+    "answers": [
+      "Argentina",
+      "México",
+      "Perú",
+      "Chile"
+    ],
+    "correct": 3,
+    "meta": null
+  },
+  {
+    "id": "fgc-mil-007",
+    "mode": "Millonario",
+    "category": "Historia FGC",
+    "difficulty": "Medium",
+    "question": "En el «EVO Moment 37», ¿cuántos golpes del Super de Chun-Li bloqueó Daigo con parry?",
+    "answers": [
+      "10",
+      "12",
+      "15",
+      "18"
+    ],
+    "correct": 2,
+    "meta": null
+  },
+  {
+    "id": "fgc-mil-008",
+    "mode": "Millonario",
+    "category": "Escena Latinoamericana",
+    "difficulty": "Medium",
+    "question": "¿Quién ganó Ultimate Marvel vs. Capcom 3 en EVO 2015, primer título de EVO para Chile?",
+    "answers": [
+      "RayRay",
+      "Kane Blueriver",
+      "NYChrisG",
+      "Filipino Champ"
+    ],
+    "correct": 1,
+    "meta": null
+  },
+  {
+    "id": "fgc-mil-009",
+    "mode": "Millonario",
+    "category": "Jugadores Legendarios",
+    "difficulty": "Medium",
+    "question": "¿De qué país es Benjamin «ProblemX» Simon, campeón de Street Fighter V en EVO 2018?",
+    "answers": [
+      "Reino Unido",
+      "Francia",
+      "Estados Unidos",
+      "Canadá"
+    ],
+    "correct": 0,
+    "meta": null
+  },
+  {
+    "id": "fgc-mil-010",
+    "mode": "Millonario",
+    "category": "Jugadores Legendarios",
+    "difficulty": "Medium",
+    "question": "¿En qué juego consiguió Justin Wong la mayoría de sus títulos de EVO?",
+    "answers": [
+      "Marvel vs. Capcom 2",
+      "Ultimate Marvel vs. Capcom 3",
+      "Street Fighter III: 3rd Strike",
+      "Street Fighter IV"
+    ],
+    "correct": 0,
+    "meta": null
+  },
+  {
+    "id": "fgc-mil-011",
+    "mode": "Millonario",
+    "category": "Escena Latinoamericana",
+    "difficulty": "Hard",
+    "question": "Según Guinness, ¿cuántos torneos consecutivos de Smash for Wii U ganó ZeRo entre 2014 y 2015?",
+    "answers": [
+      "32",
+      "45",
+      "56",
+      "72"
+    ],
+    "correct": 2,
+    "meta": null
+  },
+  {
+    "id": "fgc-mil-012",
+    "mode": "Millonario",
+    "category": "Jugadores Legendarios",
+    "difficulty": "Hard",
+    "question": "¿A quién venció ProblemX en la gran final de Street Fighter V de EVO 2018?",
+    "answers": [
+      "Fuudo",
+      "Punk",
+      "Infiltration",
+      "Tokido"
+    ],
+    "correct": 3,
+    "meta": null
+  },
+  {
+    "id": "fgc-mil-013",
+    "mode": "Millonario",
+    "category": "Historia FGC",
+    "difficulty": "Hard",
+    "question": "¿Qué miembro de Capcom descubrió, probando Street Fighter II, el «cancel» que dio origen a los combos?",
+    "answers": [
+      "Akira Nishitani",
+      "Noritaka Funamizu",
+      "Yoshinori Ono",
+      "Takashi Nishiyama"
+    ],
+    "correct": 1,
+    "meta": null
+  },
+  {
+    "id": "fgc-mil-014",
+    "mode": "Millonario",
+    "category": "Jugadores Legendarios",
+    "difficulty": "Hard",
+    "question": "Al ganar Tekken 8 en EVO Japan 2025, ¿qué título de EVO sumaba el coreano Knee?",
+    "answers": [
+      "Su 2.º",
+      "Su 3.º",
+      "Su 4.º",
+      "Su 5.º"
+    ],
+    "correct": 2,
+    "meta": null
+  },
+  {
+    "id": "fgc-mil-015",
+    "mode": "Millonario",
+    "category": "Historia FGC",
+    "difficulty": "Hard",
+    "question": "¿Qué revista japonesa organizaba el legendario torneo Tougeki – Super Battle Opera?",
+    "answers": [
+      "Famitsu",
+      "Gamest",
+      "Dengeki",
+      "Arcadia"
+    ],
+    "correct": 3,
+    "meta": null
+  },
+  {
+    "id": "fgc-mil-016",
+    "mode": "Millonario",
+    "category": "Historia FGC",
+    "difficulty": "Easy",
+    "question": "¿Con qué personaje jugó Daigo Umehara en el «EVO Moment 37»?",
+    "answers": [
+      "Ryu",
+      "Ken",
+      "Akuma",
+      "Dudley"
+    ],
+    "correct": 1,
+    "meta": null
+  },
+  {
+    "id": "fgc-mil-017",
+    "mode": "Millonario",
+    "category": "Historia FGC",
+    "difficulty": "Medium",
+    "question": "¿Qué personaje usaba Justin Wong cuando Daigo le hizo los famosos parries?",
+    "answers": [
+      "Chun-Li",
+      "Yun",
+      "Makoto",
+      "Urien"
+    ],
+    "correct": 0,
+    "meta": null
+  },
+  {
+    "id": "fgc-mil-018",
+    "mode": "Millonario",
+    "category": "Jugadores Legendarios",
+    "difficulty": "Medium",
+    "question": "¿En qué saga es una leyenda el coreano Bae «Knee» Jae-min?",
+    "answers": [
+      "Street Fighter",
+      "Soulcalibur",
+      "Dead or Alive",
+      "Tekken"
+    ],
+    "correct": 3,
+    "meta": null
+  },
+  {
+    "id": "fgc-mil-019",
+    "mode": "Millonario",
+    "category": "Jugadores Legendarios",
+    "difficulty": "Medium",
+    "question": "El británico Ryan Hart ganó EVO dos veces. ¿En qué saga?",
+    "answers": [
+      "Virtua Fighter",
+      "Tekken",
+      "Street Fighter",
+      "Marvel vs. Capcom"
+    ],
+    "correct": 1,
+    "meta": null
+  },
+  {
+    "id": "fgc-mil-020",
+    "mode": "Millonario",
+    "category": "Jugadores Legendarios",
+    "difficulty": "Medium",
+    "question": "¿Quién ganó el primer torneo de Street Fighter V celebrado en EVO, en 2016?",
+    "answers": [
+      "Infiltration",
+      "Fuudo",
+      "Tokido",
+      "Daigo Umehara"
+    ],
+    "correct": 0,
+    "meta": null
+  },
+  {
+    "id": "fgc-mil-021",
+    "mode": "Millonario",
+    "category": "Escena Latinoamericana",
+    "difficulty": "Medium",
+    "question": "En 2026, el chileno Craime se convirtió en el campeón más joven de la Esports World Cup. ¿En qué juego?",
+    "answers": [
+      "Tekken 8",
+      "Street Fighter 6",
+      "Fatal Fury: City of the Wolves",
+      "Mortal Kombat 1"
+    ],
+    "correct": 1,
+    "meta": null
+  },
+  {
+    "id": "fgc-mil-022",
+    "mode": "Millonario",
+    "category": "Escena Latinoamericana",
+    "difficulty": "Medium",
+    "question": "¿De qué saga es referente el brasileño Bruno «KillerXinok» Sousa?",
+    "answers": [
+      "Mortal Kombat",
+      "Tekken",
+      "The King of Fighters",
+      "Guilty Gear"
+    ],
+    "correct": 0,
+    "meta": null
+  },
+  {
+    "id": "fgc-mil-023",
+    "mode": "Millonario",
+    "category": "Escena Latinoamericana",
+    "difficulty": "Medium",
+    "question": "¿De qué país es Keoma Pacheco, top 8 de la Capcom Cup en Ultra Street Fighter IV?",
+    "answers": [
+      "Brasil",
+      "México",
+      "Argentina",
+      "Colombia"
+    ],
+    "correct": 0,
+    "meta": null
+  },
+  {
+    "id": "fgc-mil-024",
+    "mode": "Millonario",
+    "category": "Curiosidades",
+    "difficulty": "Medium",
+    "question": "En el «Wombo Combo», SilentSpectre remató la jugada con la famosa «rodilla» de…",
+    "answers": [
+      "Ganondorf",
+      "Falco",
+      "Marth",
+      "Captain Falcon"
+    ],
+    "correct": 3,
+    "meta": null
+  },
+  {
+    "id": "fgc-mil-025",
+    "mode": "Millonario",
+    "category": "Jugadores Legendarios",
+    "difficulty": "Hard",
+    "question": "¿Quién ganó Tekken 7 en EVO 2017 venciendo en la gran final a su compañero de equipo Saint?",
+    "answers": [
+      "Knee",
+      "Qudans",
+      "JDCR",
+      "Arslan Ash"
+    ],
+    "correct": 2,
+    "meta": null
+  },
+  {
+    "id": "fgc-mil-026",
+    "mode": "Millonario",
+    "category": "Jugadores Legendarios",
+    "difficulty": "Hard",
+    "question": "¿Qué coreano ganó el Tekken 8 de la Esports World Cup en 2024 y de nuevo en 2025?",
+    "answers": [
+      "Knee",
+      "ULSAN",
+      "LowHigh",
+      "Arslan Ash"
+    ],
+    "correct": 1,
+    "meta": null
+  },
+  {
+    "id": "fgc-mil-027",
+    "mode": "Millonario",
+    "category": "Escena Latinoamericana",
+    "difficulty": "Hard",
+    "question": "Según Guinness, ¿frente a cuántos rivales ganó ZeRo Smash for Wii U en EVO 2015 sin perder una ronda?",
+    "answers": [
+      "864",
+      "1.350",
+      "1.926",
+      "2.640"
+    ],
+    "correct": 2,
+    "meta": null
+  },
+  {
+    "id": "fgc-mil-028",
+    "mode": "Millonario",
+    "category": "Escena Latinoamericana",
+    "difficulty": "Hard",
+    "question": "¿Qué edad tenía Craime cuando ganó Street Fighter 6 en la Esports World Cup 2026?",
+    "answers": [
+      "13 años",
+      "15 años",
+      "17 años",
+      "19 años"
+    ],
+    "correct": 1,
+    "meta": null
+  },
+  {
+    "id": "fgc-mil-029",
+    "mode": "Millonario",
+    "category": "Escena Latinoamericana",
+    "difficulty": "Hard",
+    "question": "¿Qué puesto logró el joven brasileño Zeeus en Mortal Kombat 1 en EVO 2024?",
+    "answers": [
+      "1.º",
+      "2.º",
+      "3.º",
+      "5.º"
+    ],
+    "correct": 2,
+    "meta": null
+  }
+]

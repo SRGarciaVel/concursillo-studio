@@ -1,0 +1,407 @@
+[
+  {
+    "id": "fgc-rosco-A",
+    "mode": "Rosco",
+    "category": "Jugadores Legendarios",
+    "difficulty": "Medium",
+    "question": "Jugador pakistaní que tiene el récord de títulos de EVO en Tekken",
+    "answers": [
+      "Arslan Ash"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "A",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "fgc-rosco-B",
+    "mode": "Rosco",
+    "category": "Escena Latinoamericana",
+    "difficulty": "Medium",
+    "question": "Jugador chileno (Nicolás González) que ganó Ultimate Marvel vs. Capcom 3 en EVO 2015",
+    "answers": [
+      "Kane Blueriver"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "B",
+      "rosco_starts_with": false
+    }
+  },
+  {
+    "id": "fgc-rosco-C",
+    "mode": "Rosco",
+    "category": "Escena Latinoamericana",
+    "difficulty": "Medium",
+    "question": "Apodo de Jaime Bustos, campeón de Street Fighter 6 en la Esports World Cup 2026 con solo 15 años",
+    "answers": [
+      "Craime"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "C",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "fgc-rosco-D",
+    "mode": "Rosco",
+    "category": "Jugadores Legendarios",
+    "difficulty": "Easy",
+    "question": "Jugador japonés conocido como «The Beast», protagonista del EVO Moment 37",
+    "answers": [
+      "Daigo Umehara"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "D",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "fgc-rosco-E",
+    "mode": "Rosco",
+    "category": "Historia FGC",
+    "difficulty": "Easy",
+    "question": "Siglas del torneo de juegos de lucha más famoso del mundo, celebrado cada verano en Las Vegas",
+    "answers": [
+      "EVO"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "E",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "fgc-rosco-F",
+    "mode": "Rosco",
+    "category": "Historia FGC",
+    "difficulty": "Hard",
+    "question": "Apellido del productor de Capcom que, probando Street Fighter II, descubrió el «cancel» que dio origen a los combos",
+    "answers": [
+      "Funamizu"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "F",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "fgc-rosco-G",
+    "mode": "Rosco",
+    "category": "Cultura FGC",
+    "difficulty": "Medium",
+    "question": "Libro de récords que reconoce las 56 victorias seguidas de ZeRo en torneos de Smash for Wii U",
+    "answers": [
+      "Guinness"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "G",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "fgc-rosco-H",
+    "mode": "Rosco",
+    "category": "Jugadores Legendarios",
+    "difficulty": "Medium",
+    "question": "Apellido del británico Ryan, dos veces campeón de EVO en Tekken (2004 y 2008)",
+    "answers": [
+      "Hart"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "H",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "fgc-rosco-I",
+    "mode": "Rosco",
+    "category": "Jugadores Legendarios",
+    "difficulty": "Medium",
+    "question": "Jugador surcoreano que ganó el primer torneo de Street Fighter V en EVO, en 2016",
+    "answers": [
+      "Infiltration"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "I",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "fgc-rosco-J",
+    "mode": "Rosco",
+    "category": "Jugadores Legendarios",
+    "difficulty": "Easy",
+    "question": "Jugador estadounidense que recibió los 15 parries de Daigo en el EVO Moment 37",
+    "answers": [
+      "Justin Wong"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "J",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "fgc-rosco-K",
+    "mode": "Rosco",
+    "category": "Jugadores Legendarios",
+    "difficulty": "Medium",
+    "question": "Jugador surcoreano (Bae Jae-min) que ganó Tekken 8 en EVO Japan 2025",
+    "answers": [
+      "Knee"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "K",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "fgc-rosco-L",
+    "mode": "Rosco",
+    "category": "Cultura FGC",
+    "difficulty": "Medium",
+    "question": "Wiki colaborativa de esports muy usada para consultar brackets y resultados de la FGC",
+    "answers": [
+      "Liquipedia"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "L",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "fgc-rosco-M",
+    "mode": "Rosco",
+    "category": "Juegos",
+    "difficulty": "Easy",
+    "question": "Entrega de Super Smash Bros. para GameCube en la que nació el famoso «Wombo Combo»",
+    "answers": [
+      "Melee"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "M",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "fgc-rosco-N",
+    "mode": "Rosco",
+    "category": "Jugadores Legendarios",
+    "difficulty": "Hard",
+    "question": "Apodo de Nairoby Quezada, el jugador que puso fin a la racha de 56 torneos de ZeRo en 2015",
+    "answers": [
+      "Nairo"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "N",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "fgc-rosco-Ñ",
+    "mode": "Rosco",
+    "category": "Cultura FGC",
+    "difficulty": "Easy",
+    "question": "Lo que inflige cada golpe y hace bajar la barra de vida del rival",
+    "answers": [
+      "Daño"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "Ñ",
+      "rosco_starts_with": false
+    }
+  },
+  {
+    "id": "fgc-rosco-O",
+    "mode": "Rosco",
+    "category": "Historia FGC",
+    "difficulty": "Hard",
+    "question": "Última palabra del nombre del legendario torneo japonés Tougeki – Super Battle…",
+    "answers": [
+      "Opera"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "O",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "fgc-rosco-P",
+    "mode": "Rosco",
+    "category": "Jugadores Legendarios",
+    "difficulty": "Medium",
+    "question": "Apodo de Benjamin Simon, británico campeón de Street Fighter V en EVO 2018",
+    "answers": [
+      "ProblemX"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "P",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "fgc-rosco-Q",
+    "mode": "Rosco",
+    "category": "Cultura FGC",
+    "difficulty": "Hard",
+    "question": "Marca china de arcade sticks muy popular entre los jugadores de lucha",
+    "answers": [
+      "Qanba"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "Q",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "fgc-rosco-R",
+    "mode": "Rosco",
+    "category": "Juegos",
+    "difficulty": "Easy",
+    "question": "Luchador de kimono blanco y cinta roja, protagonista clásico de Street Fighter",
+    "answers": [
+      "Ryu"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "R",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "fgc-rosco-S",
+    "mode": "Rosco",
+    "category": "Juegos",
+    "difficulty": "Easy",
+    "question": "Saga de Capcom cuya segunda entrega, de 1991, popularizó los juegos de lucha",
+    "answers": [
+      "Street Fighter"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "S",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "fgc-rosco-T",
+    "mode": "Rosco",
+    "category": "Juegos",
+    "difficulty": "Easy",
+    "question": "Saga de lucha 3D de Bandai Namco en la que brillan Knee, Arslan Ash y ULSAN",
+    "answers": [
+      "Tekken"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "T",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "fgc-rosco-U",
+    "mode": "Rosco",
+    "category": "Jugadores Legendarios",
+    "difficulty": "Hard",
+    "question": "Jugador surcoreano que ganó Tekken 8 en la Esports World Cup de 2024 y de 2025",
+    "answers": [
+      "ULSAN"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "U",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "fgc-rosco-V",
+    "mode": "Rosco",
+    "category": "Juegos",
+    "difficulty": "Medium",
+    "question": "Juego de SEGA de 1993, el primer juego de lucha con gráficos poligonales en 3D",
+    "answers": [
+      "Virtua Fighter"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "V",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "fgc-rosco-W",
+    "mode": "Rosco",
+    "category": "Cultura FGC",
+    "difficulty": "Easy",
+    "question": "Nombre del combo viral de Smash Melee (2008) que remató SilentSpectre con Captain Falcon",
+    "answers": [
+      "Wombo Combo"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "W",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "fgc-rosco-X",
+    "mode": "Rosco",
+    "category": "Juegos",
+    "difficulty": "Medium",
+    "question": "Crossover de Capcom con personajes de Bandai Namco que Infiltration ganó en EVO 2012 y 2013",
+    "answers": [
+      "Street Fighter X Tekken"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "X",
+      "rosco_starts_with": false
+    }
+  },
+  {
+    "id": "fgc-rosco-Y",
+    "mode": "Rosco",
+    "category": "Juegos",
+    "difficulty": "Medium",
+    "question": "Personaje de Tekken: ninja enmascarado que lucha con una espada",
+    "answers": [
+      "Yoshimitsu"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "Y",
+      "rosco_starts_with": true
+    }
+  },
+  {
+    "id": "fgc-rosco-Z",
+    "mode": "Rosco",
+    "category": "Escena Latinoamericana",
+    "difficulty": "Easy",
+    "question": "Jugador chileno de Smash Bros. con el récord Guinness de 56 torneos ganados seguidos",
+    "answers": [
+      "ZeRo"
+    ],
+    "correct": 0,
+    "meta": {
+      "rosco_letter": "Z",
+      "rosco_starts_with": true
+    }
+  }
+]
