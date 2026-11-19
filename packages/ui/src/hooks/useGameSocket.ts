@@ -14,6 +14,8 @@ export interface UseGameSocket {
   status: ConnectionStatus;
   /** Último error enviado por el servidor (comando inválido, etc.). */
   lastError: string | null;
+  /** Sube con cada error, aunque el texto se repita (sirve como dependencia de efectos). */
+  errorCount: number;
   /** Envía un comando. Devuelve false si el socket no está abierto. */
   sendCommand: (command: ClientCommand) => boolean;
 }
@@ -27,16 +29,21 @@ export interface UseGameSocketOptions {
   url?: string;
   /** Se llama con cada evento de audio. Solo el stage debería reproducirlos. */
   onAudio?: (sound: Sound) => void;
+  /** Se llama con cada error del servidor, también si se repite el mismo texto. */
+  onError?: (message: string) => void;
 }
 
-export function useGameSocket({ url = DEFAULT_WS_URL, onAudio }: UseGameSocketOptions = {}): UseGameSocket {
+export function useGameSocket({ url = DEFAULT_WS_URL, onAudio, onError }: UseGameSocketOptions = {}): UseGameSocket {
   const [state, setState] = useState<GameState | null>(null);
   const [status, setStatus] = useState<ConnectionStatus>("connecting");
   const [lastError, setLastError] = useState<string | null>(null);
+  const [errorCount, setErrorCount] = useState(0);
   const socketRef = useRef<WebSocket | null>(null);
   // Ref para no reconectar cuando cambia la identidad del callback.
   const onAudioRef = useRef(onAudio);
   onAudioRef.current = onAudio;
+  const onErrorRef = useRef(onError);
+  onErrorRef.current = onError;
 
   useEffect(() => {
     let disposed = false;
@@ -69,6 +76,8 @@ export function useGameSocket({ url = DEFAULT_WS_URL, onAudio }: UseGameSocketOp
             break;
           case "error":
             setLastError(msg.payload);
+            setErrorCount((n) => n + 1);
+            onErrorRef.current?.(msg.payload);
             break;
           case "audio":
             onAudioRef.current?.(msg.payload.sound);
@@ -103,5 +112,5 @@ export function useGameSocket({ url = DEFAULT_WS_URL, onAudio }: UseGameSocketOp
     return true;
   }, []);
 
-  return { state, status, lastError, sendCommand };
+  return { state, status, lastError, errorCount, sendCommand };
 }

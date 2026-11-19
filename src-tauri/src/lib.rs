@@ -2,6 +2,7 @@
 pub mod comodines;
 pub mod files;
 pub mod game;
+pub mod logger;
 pub mod presets;
 pub mod schemas;
 pub mod server;
@@ -48,12 +49,38 @@ async fn open_editor(app: AppHandle) -> Result<(), String> {
     show_editor(&app).map_err(|e| e.to_string())
 }
 
+/// Copia texto al portapapeles del sistema (botón "Copiar URL" de OBS).
+/// Se hace desde Rust porque `navigator.clipboard` en WebView2 exige que la
+/// ventana tenga el foco y un gesto de usuario "reciente", y falla en silencio
+/// si el streamer está con OBS delante.
+#[tauri::command]
+fn copy_to_clipboard(app: AppHandle, text: String) -> Result<(), String> {
+    use tauri_plugin_clipboard_manager::ClipboardExt;
+    if text.len() > 4096 {
+        return Err("Texto demasiado largo para copiar".into());
+    }
+    app.clipboard().write_text(text).map_err(|e| {
+        logger::warn("clipboard", format!("no se pudo copiar: {e}"));
+        e.to_string()
+    })
+}
+
+/// Botón "Abrir carpeta de logs" del panel de control.
+#[tauri::command]
+fn open_logs_folder() -> Result<(), String> {
+    let dir = logger::dir().ok_or("El registro no está disponible")?;
+    let result = logger::reveal(dir);
+    logger::info("logs", format!("abrir carpeta {} → {}", dir.display(), if result.is_ok() { "ok" } else { "error" }));
+    result
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let app_state = AppState::new(GameState::new(GameMode::Millonario, 15));
 
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_clipboard_manager::init())
         .invoke_handler(tauri::generate_handler![
             files::save_questions_set,
             files::load_questions_set,
@@ -67,6 +94,8 @@ pub fn run() {
             sounds::reset_sound,
             sounds::list_sounds,
             open_editor,
+            open_logs_folder,
+            copy_to_clipboard,
         ])
         // El editor es secundario: cerrarlo no afecta a nada. Cerrar el panel
         // de control (ventana principal) cierra la app entera, editor incluido.
@@ -76,6 +105,18 @@ pub fn run() {
             }
         })
         .setup(move |app| {
+            // Logs siempre en %APPDATA%\com.concursillo.studio\logs (también en
+            // desarrollo, para no ensuciar el repositorio).
+            if let Ok(app_data) = app.path().app_data_dir() {
+                if let Err(e) = logger::init(&app_data.join("logs")) {
+                    eprintln!("[logger] no se pudo abrir el log: {e}");
+                }
+            }
+            logger::info("app", format!("Concursillo Studio {} arrancando", env!("CARGO_PKG_VERSION")));
+            if let Some(dir) = logger::dir() {
+                logger::info("app", format!("logs en {:?}", dir));
+            }
+
             let data_dir = files::data_dir(app.path().app_data_dir().ok());
             let resources = app.path().resource_dir().ok();
 
@@ -84,9 +125,9 @@ pub fn run() {
             #[cfg(not(debug_assertions))]
             if let Some(resources) = &resources {
                 match files::seed_data(&resources.join("data"), &data_dir) {
-                    Ok(n) if n > 0 => println!("[datos] {n} archivos de ejemplo copiados a {}", data_dir.display()),
+                    Ok(n) if n > 0 => logger::info("datos", format!("{n} archivos de ejemplo copiados a {}", data_dir.display())),
                     Ok(_) => {}
-                    Err(e) => eprintln!("[datos] no se pudieron copiar los ejemplos: {e}"),
+                    Err(e) => logger::error("datos", format!("no se pudieron copiar los ejemplos: {e}")),
                 }
             }
 
@@ -116,7 +157,8 @@ pub fn run() {
             let sounds_dir = data_dir.join("sounds");
             tauri::async_runtime::spawn(async move {
                 if let Err(e) = server::serve(state, sounds_dir, stage_assets).await {
-                    eprintln!("[server] error: {e}");
+                    // Típico: el puerto 4322 ya está ocupado (otra instancia abierta).
+                    logger::error("server", format!("el servidor no pudo arrancar: {e}"));
                 }
             });
 

@@ -13,3 +13,5 @@ export type { NoticeKind } from "./Notice";
 export { RollingNumber } from "./RollingNumber";
 export { MotionRoot, prefersReducedMotion } from "./MotionRoot";
 export { PRESS_SPRING } from "./Button";
+export { ToastProvider, useToast } from "./Toast";
+export type { ToastApi, ToastKind } from "./Toast";

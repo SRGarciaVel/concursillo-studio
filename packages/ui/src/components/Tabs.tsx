@@ -27,7 +27,22 @@ export function Tabs<T extends string>({
   // Id único por grupo de pestañas: la "píldora" activa se desliza entre ellas.
   const pillId = useId();
   return (
-    <nav role="tablist" className={cn("inline-flex gap-1 rounded-2xl border border-line bg-zinc-900/80 p-1 shadow-lg shadow-black/20", className)}>
+    <nav
+      role="tablist"
+      onKeyDown={(e) => {
+        const i = items.findIndex((t) => t.id === value);
+        const next =
+          e.key === "ArrowRight" ? (i + 1) % items.length
+          : e.key === "ArrowLeft" ? (i - 1 + items.length) % items.length
+          : e.key === "Home" ? 0
+          : e.key === "End" ? items.length - 1
+          : -1;
+        if (next < 0) return;
+        e.preventDefault();
+        onChange(items[next].id);
+        (e.currentTarget.querySelectorAll<HTMLButtonElement>('[role="tab"]')[next])?.focus();
+      }}
+      className={cn("inline-flex gap-1 rounded-2xl border border-line bg-zinc-900/80 p-1 shadow-lg shadow-black/20", className)}>
       {items.map(({ id, label, icon: Icon, badge }) => {
         const active = id === value;
         return (
@@ -36,6 +51,7 @@ export function Tabs<T extends string>({
             role="tab"
             type="button"
             aria-selected={active}
+            tabIndex={active ? 0 : -1}
             onClick={() => onChange(id)}
             className={cn(
               "relative inline-flex h-9 items-center gap-2 rounded-xl px-4 text-sm font-semibold transition-colors duration-150",

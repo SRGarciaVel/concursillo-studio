@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FolderOpen, RefreshCw, Save } from "lucide-react";
-import { Badge, Button, Card, Field, IconButton, Input, Notice, Select, cn, ROSCO_ALPHABET } from "@concursillo/ui";
+import { Badge, Button, Card, Field, IconButton, Input, Notice, Select, cn, ROSCO_ALPHABET, useToast } from "@concursillo/ui";
 import type { GameMode, Question } from "@concursillo/shared-types";
 import { QuestionForm } from "./QuestionForm";
 import { QuestionList } from "./QuestionList";
@@ -8,6 +8,7 @@ import { MODE_LABEL, type QuestionSetState } from "./useQuestionSet";
 
 /** Pestaña Preguntas: barra del set arriba y dos paneles (lista | formulario). */
 export function QuestionsTab({ set }: { set: QuestionSetState }) {
+  const toast = useToast();
   const [editing, setEditing] = useState<Question | null>(null);
   const [toLoad, setToLoad] = useState("");
   const loadTarget = toLoad || set.sets[0] || "";
@@ -16,9 +17,10 @@ export function QuestionsTab({ set }: { set: QuestionSetState }) {
     if (editing) {
       set.update(q);
       setEditing(null);
-      set.setNotice({ kind: "ok", text: "Pregunta actualizada" });
+      toast.success("Pregunta actualizada");
     } else {
       set.add(q);
+      toast.success(`Pregunta añadida (${set.questions.length + 1} en el set)`);
     }
   };
 

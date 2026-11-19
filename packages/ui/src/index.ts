@@ -11,5 +11,5 @@ export { ROSCO_ALPHABET, roscoLetterOf, detectSetMode, roscoSetProblems, roscoHi
 export type { RoscoLetterChar } from "./rosco";
 export { COMODINES, COMODIN_INFO } from "./comodines";
 export { listPresets, loadPreset, savePreset, slugify } from "./api/presets";
-export { parseBulkQuestions, bulkTemplate, listSounds, saveCustomSound, resetSound, openEditor } from "./api/media";
+export { parseBulkQuestions, bulkTemplate, listSounds, saveCustomSound, resetSound, openEditor, openLogsFolder, copyText, STAGE_URL } from "./api/media";
 export * from "./components";

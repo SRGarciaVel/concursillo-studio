@@ -121,7 +121,8 @@ function CurrentQuestion({ state }: { state: GameState }) {
             <span>{q.category}</span>
           </div>
           <p className="line-clamp-2 text-sm font-semibold leading-snug text-zinc-100">{q.question}</p>
-          {q.answers.length > 1 ? (
+          {/* Millonario: las respuestas están en los botones A–D de Acciones (no se duplican aquí). */}
+          {!rosco ? null : q.answers.length > 1 ? (
             <ol className="mt-1.5 grid grid-cols-2 gap-1">
               {q.answers.map((a, i) => {
                 const correct = i === q.correct;

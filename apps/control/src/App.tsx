@@ -1,15 +1,16 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { AnimatePresence, LayoutGroup, motion } from "motion/react";
-import { Gamepad2, Palette, SquarePen } from "lucide-react";
-import { Badge, Button, Select, Switch, errorMessage, listPresets, loadPreset, openEditor, useGameSocket } from "@concursillo/ui";
+import { FolderOpen, Gamepad2, Palette, SquarePen } from "lucide-react";
+import { Badge, Button, Select, errorMessage, openEditor, openLogsFolder, useGameSocket, useToast } from "@concursillo/ui";
 import { THEMES } from "@concursillo/themes";
-import type { ClientCommand, PresetSummary } from "@concursillo/shared-types";
+import type { ClientCommand } from "@concursillo/shared-types";
 import { ActionsCard } from "./ActionsCard";
 import { ComodinesCard } from "./ComodinesCard";
-import { LogCard, type LogEntry } from "./LogCard";
+import { ObsCard } from "./ObsCard";
 import { PresetCard } from "./PresetCard";
 import { StatusCard } from "./StatusCard";
 import { TwitchCard } from "./TwitchCard";
+import { ShortcutsHelp, useLiveShortcuts } from "./shortcuts";
 
 /** Muelle elástico para recolocar paneles. */
 const LAYOUT_SPRING = { type: "spring", stiffness: 260, damping: 26, mass: 0.9 } as const;
@@ -37,83 +38,43 @@ const CONNECTION = {
   closed: { label: "Motor desconectado", variant: "danger" as const, dot: true },
 };
 
-/** Resumen corto para el log (las listas de preguntas son demasiado largas). */
-function describe(cmd: ClientCommand): string {
-  if (cmd.action === "init_game") return `init_game (${cmd.payload.length} preguntas)`;
-  if (cmd.action === "init_rosco") return `init_rosco (${cmd.payload.questions.length} letras)`;
-  if (cmd.action === "start_preset") return `start_preset «${cmd.payload.preset.name}» (${cmd.payload.preset.mode})`;
-  // Nunca escribir el token en el log.
-  if (cmd.action === "connect_twitch") return `connect_twitch #${cmd.payload.channel}${cmd.payload.token ? " (con token)" : " (anónimo)"}`;
-  return "payload" in cmd ? `${cmd.action} ${JSON.stringify(cmd.payload)}` : cmd.action;
-}
-
 export default function App() {
-  const { state, status, lastError, sendCommand } = useGameSocket();
-  const [log, setLog] = useState<LogEntry[]>([]);
-  const logId = useRef(0);
-  const [presets, setPresets] = useState<PresetSummary[]>([]);
-  const [selectedPreset, setSelectedPreset] = useState("");
-  const [presetsError, setPresetsError] = useState<string | null>(null);
+  const toast = useToast();
+  // Los rechazos del backend (p. ej. "no hay pregunta cargada") se ven como aviso,
+  // también si se repite el mismo. El detalle técnico queda en el log del backend.
+  const { state, status, errorCount, sendCommand } = useGameSocket({ onError: (msg) => toast.error(msg) });
 
-  const addLog = (kind: LogEntry["kind"], text: string) =>
-    setLog((l) => [{ id: ++logId.current, time: new Date().toLocaleTimeString(), kind, text }, ...l].slice(0, 60));
-
+  /** Envía un comando; si no hay conexión con el motor, avisa en lugar de fallar en silencio. */
   const send = (cmd: ClientCommand) => {
-    const ok = sendCommand(cmd);
-    addLog(ok ? "sent" : "fail", ok ? describe(cmd) : `sin conexión: ${describe(cmd)}`);
-  };
-
-  // Los errores del backend también quedan en el log (en rojo).
-  useEffect(() => {
-    if (lastError) addLog("error", lastError);
-  }, [lastError]);
-
-  const refreshPresets = async () => {
-    try {
-      const list = await listPresets();
-      setPresets(list);
-      setSelectedPreset((s) => (list.some((p) => p.id === s) ? s : (list[0]?.id ?? "")));
-      setPresetsError(null);
-    } catch (e) {
-      setPresetsError(errorMessage(e));
-    }
-  };
-
-  useEffect(() => {
-    void refreshPresets();
-  }, []);
-
-  // "Iniciando…" desde el clic hasta que llega el siguiente estado del backend.
-  const [starting, setStarting] = useState(false);
-  useEffect(() => setStarting(false), [state, lastError]);
-
-  /** Un único comando: el backend aplica modo, preguntas, tiempo, tema y Twitch. */
-  const startPreset = async () => {
-    setStarting(true);
-    try {
-      const preset = await loadPreset(selectedPreset);
-      addLog("info", `preset «${preset.name}» cargado`);
-      send({ action: "start_preset", payload: { preset } });
-    } catch (e) {
-      setPresetsError(errorMessage(e));
-      setStarting(false);
-    }
+    if (!sendCommand(cmd)) toast.error("Sin conexión con el motor: el comando no se ha enviado");
   };
 
   const showEditor = async () => {
     try {
       await openEditor();
     } catch (e) {
-      addLog("error", `no se pudo abrir el editor: ${errorMessage(e)}`);
+      toast.error(`No se pudo abrir el editor: ${errorMessage(e)}`);
+    }
+  };
+
+  const showLogs = async () => {
+    try {
+      await openLogsFolder();
+    } catch (e) {
+      toast.error(errorMessage(e));
     }
   };
 
   const conn = CONNECTION[status];
   const online = status === "open";
 
+  // Atajos de teclado del directo (1–4/A–D, Enter, Espacio, N, R/F/P, Esc, ?).
+  const [helpOpen, setHelpOpen] = useState(false);
+  useLiveShortcuts({ state, online, send, helpOpen, setHelpOpen });
+
   // h-screen + overflow-hidden: la ventana nunca hace scroll; si algo no cabe, solo se desplaza su columna.
   return (
-    <div className="mx-auto flex h-screen max-w-[1600px] flex-col gap-3 overflow-hidden p-3 lg:px-4">
+    <div className="mx-auto flex h-screen max-w-[1600px] flex-col gap-3 overflow-hidden p-3 pb-1.5 lg:px-4">
       {/* Cabecera: marca, conexión, tema y editor. */}
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
@@ -144,27 +105,16 @@ export default function App() {
               ))}
             </Select>
           </label>
-          {/* Fondo transparente: el stage se superpone limpio sobre el gameplay o la webcam en OBS. */}
-          <div className="rounded-xl border border-line bg-white/[0.03] px-3 py-1.5" title="Quita el fondo del stage para superponerlo en OBS">
-            <Switch
-              name="transparent_background"
-              label="Fondo transparente"
-              checked={state?.transparent_background ?? false}
-              disabled={!online}
-              onChange={(on) => send({ action: "set_transparent_background", payload: on })}
-            />
-          </div>
           <Button variant="secondary" icon={SquarePen} onClick={showEditor} title="Abrir el editor (o traerlo al frente)">
             Editor
           </Button>
         </div>
       </header>
 
-      {/* Dashboard: juego a la izquierda, configuración y comodines a la derecha. */}
       {/*
+        Dashboard: juego a la izquierda, configuración y comodines a la derecha.
         LayoutGroup: cuando cambia el contenido de una tarjeta (Millonario ↔ Rosco,
-        comodín abierto, log desplegado…) las demás se recolocan con un muelle
-        en lugar de saltar de golpe.
+        comodín abierto…) las demás se recolocan con un muelle en lugar de saltar.
       */}
       <LayoutGroup>
         <main className="grid min-h-0 flex-1 grid-cols-1 gap-3 overflow-y-auto lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:overflow-visible">
@@ -175,22 +125,10 @@ export default function App() {
             <Panel id="actions">
               <ActionsCard state={state} online={online} send={send} />
             </Panel>
-            <Panel id="log" className="flex min-h-0 flex-1 flex-col">
-              <LogCard entries={log} onClear={() => setLog([])} />
-            </Panel>
           </div>
           <div className="flex min-h-0 min-w-0 flex-col gap-3 lg:-mr-1 lg:overflow-y-auto lg:pr-1">
             <Panel id="preset">
-              <PresetCard
-                presets={presets}
-                selected={selectedPreset}
-                onSelect={setSelectedPreset}
-                onStart={startPreset}
-                onRefresh={refreshPresets}
-                starting={starting}
-                online={online}
-                error={presetsError}
-              />
+              <PresetCard state={state} errorCount={errorCount} online={online} send={send} onOpenEditor={showEditor} />
             </Panel>
             <AnimatePresence initial={false}>
               {state && (
@@ -204,9 +142,27 @@ export default function App() {
                 </Panel>
               )}
             </AnimatePresence>
+            {/* Al final: se configura antes del directo; durante un comodín puede quedar debajo. */}
+            <Panel id="obs">
+              <ObsCard state={state} online={online} send={send} />
+            </Panel>
           </div>
         </main>
       </LayoutGroup>
+
+      <ShortcutsHelp open={helpOpen} setOpen={setHelpOpen} />
+
+      {/* Pie discreto: diagnóstico para cuando algo falla en directo. */}
+      <footer className="flex items-center justify-end gap-3 text-[11px] text-zinc-600">
+        <button
+          type="button"
+          onClick={() => void showLogs()}
+          className="inline-flex items-center gap-1 rounded px-1 hover:text-zinc-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+          title="Abre %APPDATA%\com.concursillo.studio\logs (app.log)"
+        >
+          <FolderOpen className="size-3" /> Abrir carpeta de logs
+        </button>
+      </footer>
     </div>
   );
 }

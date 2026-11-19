@@ -15,6 +15,8 @@ fn main() {
             "reset_sound",
             "list_sounds",
             "open_editor",
+            "open_logs_folder",
+            "copy_to_clipboard",
         ]),
     ))
     .expect("failed to run tauri-build");

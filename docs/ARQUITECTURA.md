@@ -367,7 +367,7 @@ En **release**:
 ## 10. Decisiones de seguridad
 
 - **Servidor solo en loopback** (`127.0.0.1:4322`): no es accesible desde la red local.
-- **El token de Twitch** vive únicamente en la tarea de conexión: no entra en `GameState`, ni en presets, ni en el log del Control. La conexión anónima basta para leer votos.
+- **El token de Twitch** vive únicamente en la tarea de conexión: no entra en `GameState`, ni en presets, ni en `app.log` (el log solo registra el nombre de cada acción, nunca su payload). La conexión anónima basta para leer votos.
 - **Capabilities de Tauri:** cada comando propio necesita un permiso explícito, concedido solo a las ventanas `main` y `editor` y a sus orígenes.
 - **Rutas de archivo** saneadas en un único sitio (`files::json_path`): solo `[a-zA-Z0-9_-]`, sin *path traversal*. Los nombres de sonido se validan contra el enum `Sound`.
 - **Subida de sonidos:** bytes crudos por IPC (`InvokeBody::Raw`), máximo 10 MB, validación por **firma binaria** (no por extensión) y escritura atómica (temporal y luego renombrar).

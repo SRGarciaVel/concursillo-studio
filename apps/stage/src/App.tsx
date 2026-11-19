@@ -141,6 +141,8 @@ function StageView({ state }: { state: GameState | null }) {
             {q.answers.map((answer, i) => {
               let cls = "answer";
               if (state.selected_answer === i) cls += " selected";
+              // Marcada pero sin revelar: naranja con pulso, sin decir si es correcta.
+              if (state.selected_answer === i && !revealed) cls += " pending";
               if (revealed && i === q.correct) cls += " correct";
               else if (revealed && state.selected_answer === i) cls += " wrong";
               return (

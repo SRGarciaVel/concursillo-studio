@@ -25,6 +25,8 @@
     "allow-save-custom-sound",
     "allow-reset-sound",
     "allow-list-sounds",
-    "allow-open-editor"
+    "allow-open-editor",
+    "allow-open-logs-folder",
+    "allow-copy-to-clipboard"
   ]
 }

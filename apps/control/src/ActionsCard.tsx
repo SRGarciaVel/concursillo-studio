@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AudioLines, Check, ChevronRight, CircleX, Drum, PartyPopper, Pause, Play, RotateCcw, SkipForward, Siren, Sparkles, Swords, X, Zap } from "lucide-react";
+import { AudioLines, Check, ChevronRight, CircleX, Drum, Eye, PartyPopper, Pause, Play, RotateCcw, SkipForward, Siren, Sparkles, Swords, X, Zap } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Button, Card, cn } from "@concursillo/ui";
 import type { ClientCommand, GameState, Sound } from "@concursillo/shared-types";
@@ -18,6 +18,13 @@ function PanicButton({ state, send }: { state: GameState; send: (cmd: ClientComm
   useEffect(() => {
     if (!armed) setConfirming(false);
   }, [armed]);
+  // Teclado: Esc cancela la confirmación (nadie se planta por un Enter de más).
+  useEffect(() => {
+    if (!confirming) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setConfirming(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [confirming]);
 
   return (
     <AnimatePresence mode="wait" initial={false}>
@@ -39,7 +46,8 @@ function PanicButton({ state, send }: { state: GameState; send: (cmd: ClientComm
             <Button variant="danger" icon={Siren} onClick={() => send({ action: "retire", payload: { phrase: "me cago" } })}>
               Sí, se planta
             </Button>
-            <Button variant="secondary" onClick={() => setConfirming(false)}>
+            {/* autoFocus: con teclado, la opción por defecto es la segura. */}
+            <Button variant="secondary" autoFocus onClick={() => setConfirming(false)} title="Esc">
               Seguir jugando
             </Button>
           </div>
@@ -124,6 +132,8 @@ function Soundboard({ online, send }: { online: boolean; send: (cmd: ClientComma
   );
 }
 
+const ANSWER_LETTERS = ["A", "B", "C", "D"];
+
 /** Acciones principales del presentador (cambian según el modo). */
 export function ActionsCard({ state, online, send }: Props) {
   if (!state) {
@@ -141,14 +151,15 @@ export function ActionsCard({ state, online, send }: Props) {
   const canLoadNext = state.phase === "Idle" && state.current_question_index < state.total_questions;
 
   const pauseButton = state.timer_paused ? (
-    <Button variant="secondary" icon={Play} disabled={!live || !online} onClick={() => send({ action: "resume_timer" })}>
+    <Button variant="secondary" icon={Play} disabled={!live || !online} onClick={() => send({ action: "resume_timer" })} title="Espacio">
       Reanudar
     </Button>
   ) : (
-    <Button variant="secondary" icon={Pause} disabled={!live || !online} onClick={() => send({ action: "pause_timer" })}>
+    <Button variant="secondary" icon={Pause} disabled={!live || !online} onClick={() => send({ action: "pause_timer" })} title="Espacio">
       Pausar reloj
     </Button>
   );
+  const selecting = state.phase === "Selecting" && state.selected_answer !== null;
 
   const resetButton = (
     <Button variant="ghost" icon={RotateCcw} disabled={!online} onClick={() => send({ action: "reset_game" })} title="Reiniciar la partida con el mismo set">
@@ -166,18 +177,18 @@ export function ActionsCard({ state, online, send }: Props) {
       {rosco ? (
         <div className="grid gap-2">
           {state.phase === "Idle" && (
-            <Button variant="primary" size="lg" icon={Play} fullWidth disabled={!online} onClick={() => send({ action: "load_next_question" })}>
+            <Button variant="primary" size="lg" icon={Play} fullWidth disabled={!online} onClick={() => send({ action: "load_next_question" })} title="N">
               Empezar rosco
             </Button>
           )}
           <div className="grid grid-cols-3 gap-2">
-            <Button variant="success" size="lg" icon={Check} className="h-14" disabled={!live || !online} onClick={() => send({ action: "rosco_answer", payload: { is_correct: true } })}>
+            <Button variant="success" size="lg" icon={Check} className="h-14" disabled={!live || !online} onClick={() => send({ action: "rosco_answer", payload: { is_correct: true } })} title="R">
               Acertó
             </Button>
-            <Button variant="danger" size="lg" icon={X} className="h-14" disabled={!live || !online} onClick={() => send({ action: "rosco_answer", payload: { is_correct: false } })}>
+            <Button variant="danger" size="lg" icon={X} className="h-14" disabled={!live || !online} onClick={() => send({ action: "rosco_answer", payload: { is_correct: false } })} title="F">
               Falló
             </Button>
-            <Button variant="warning" size="lg" icon={SkipForward} className="h-14" disabled={!live || !online} onClick={() => send({ action: "rosco_pass" })}>
+            <Button variant="warning" size="lg" icon={SkipForward} className="h-14" disabled={!live || !online} onClick={() => send({ action: "rosco_pass" })} title="P">
               Pasapalabra
             </Button>
           </div>
@@ -189,31 +200,57 @@ export function ActionsCard({ state, online, send }: Props) {
         </div>
       ) : (
         <div className="grid gap-2">
-          <Button variant="primary" size="lg" icon={Swords} fullWidth disabled={!canLoadNext || !online} onClick={() => send({ action: "load_next_question" })}>
-            Cargar siguiente pregunta
-          </Button>
-          <div className="grid grid-cols-2 gap-2">
+          {live && q ? (
+            // Revelar: solo con una respuesta marcada. Es el momento de tensión.
             <Button
-              variant="success"
+              variant={selecting ? "warning" : "secondary"}
               size="lg"
-              icon={Check}
-              disabled={!q || !live || comodinActive || !online}
-              onClick={() => q && send({ action: "submit_answer", payload: q.correct })}
+              icon={Eye}
+              fullWidth
+              disabled={!selecting || comodinActive || !online}
+              onClick={() => send({ action: "reveal_answer" })}
+              title="Enter"
             >
-              Simular correcta
+              {selecting ? `Revelar respuesta ${ANSWER_LETTERS[state.selected_answer!] ?? ""}` : "Marca la respuesta del concursante (A–D)"}
             </Button>
-            <Button
-              variant="danger"
-              size="lg"
-              icon={X}
-              disabled={!q || !live || comodinActive || !online}
-              onClick={() => q && send({ action: "submit_answer", payload: (q.correct + 1) % q.answers.length })}
-            >
-              Simular incorrecta
+          ) : (
+            <Button variant="primary" size="lg" icon={Swords} fullWidth disabled={!canLoadNext || !online} onClick={() => send({ action: "load_next_question" })} title="N">
+              Cargar siguiente pregunta
             </Button>
+          )}
+          {/* Respuesta del concursante: A/B/C/D. La correcta lleva un ✓ que solo ve el presentador. */}
+          <div className="grid grid-cols-2 gap-2" role="group" aria-label="Respuesta del concursante">
+            {(q?.answers.length ? q.answers : ["", "", "", ""]).map((answer, i) => {
+              const isCorrect = q?.correct === i;
+              const chosen = state.selected_answer === i;
+              const revealed = state.is_correct !== null;
+              return (
+                <Button
+                  key={i}
+                  variant="secondary"
+                  disabled={!q || !live || comodinActive || !online}
+                  onClick={() => send({ action: "select_answer", payload: i })}
+                  title={q ? `Marcar ${ANSWER_LETTERS[i]} (tecla ${i + 1} o ${ANSWER_LETTERS[i]})${isCorrect ? " · correcta" : ""}` : undefined}
+                  className={cn(
+                    "h-11 justify-start gap-2.5 px-3 disabled:opacity-70",
+                    isCorrect && "ring-1 ring-inset ring-emerald-500/50",
+                    // Tras responder: la elegida se ve (verde si acertó, roja si falló).
+                    chosen && !revealed && "!opacity-100 ring-2 ring-amber-400",
+                    chosen && revealed && (isCorrect ? "!bg-emerald-600/80 !opacity-100" : "!bg-rose-600/80 !opacity-100"),
+                    revealed && isCorrect && !chosen && "!opacity-100 !bg-emerald-600/30",
+                  )}
+                >
+                  <span className="grid size-6 shrink-0 place-items-center rounded-md bg-zinc-950/60 text-xs font-black text-amber-300">
+                    {ANSWER_LETTERS[i]}
+                  </span>
+                  <span className="min-w-0 flex-1 truncate text-left">{answer || "—"}</span>
+                  {isCorrect && <Check className="!size-4 shrink-0 text-emerald-400" aria-label="correcta" />}
+                </Button>
+              );
+            })}
           </div>
           <div className="grid grid-cols-3 gap-2">
-            <Button variant="secondary" icon={ChevronRight} disabled={state.phase !== "Answering" || !online} onClick={() => send({ action: "next_round" })}>
+            <Button variant="secondary" icon={ChevronRight} disabled={state.phase !== "Answering" || !online} onClick={() => send({ action: "next_round" })} title="N carga además la siguiente pregunta">
               Siguiente ronda
             </Button>
             {pauseButton}

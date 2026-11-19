@@ -137,6 +137,16 @@ html, body { margin: 0; background: transparent; min-height: 100vh; overflow: hi
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 28px color-mix(in srgb, var(--stage-correct) 55%, transparent), 0 14px 40px rgba(0, 0, 0, 0.38);
 }
 .answer.wrong { animation: shake 0.45s ease-in-out; }
+/* Respuesta marcada, aún sin revelar: late con un halo naranja (tensión). */
+.answer.selected.pending {
+  border-color: color-mix(in srgb, #fff 55%, var(--stage-selected));
+  animation: pick-pulse 1.2s ease-in-out infinite;
+}
+.answer.selected.pending .letter { background: rgba(0, 0, 0, 0.22); }
+@keyframes pick-pulse {
+  0%, 100% { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 0 0 color-mix(in srgb, var(--stage-selected) 0%, transparent), 0 14px 40px rgba(0, 0, 0, 0.38); transform: scale(1); }
+  50% { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 30px 4px color-mix(in srgb, var(--stage-selected) 70%, transparent), 0 14px 40px rgba(0, 0, 0, 0.38); transform: scale(1.015); }
+}
 @keyframes reveal { 40% { transform: scale(1.03); } }
 @keyframes shake {
   20%, 60% { transform: translateX(-6px); }
@@ -450,7 +460,7 @@ html, body { margin: 0; background: transparent; min-height: 100vh; overflow: hi
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .answer.correct, .answer.wrong, .rl-body, .rl-glow, .rl-ring, .stage-backdrop,
+  .answer.correct, .answer.wrong, .answer.selected.pending, .rl-body, .rl-glow, .rl-ring, .stage-backdrop,
   .vote-fill, .vote-fill::after, .vote-num.bump, .comodin-chip, .comodin-countdown,
   .timeup-text, .timeup-burst {
     animation: none !important; transition: none !important;

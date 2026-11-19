@@ -209,6 +209,12 @@ impl TwitchManager {
 /// Cambia el estado de la conexión y lo emite.
 async fn set_status(app: &AppState, status: TwitchStatus, error: Option<String>) {
     let mut game = app.game.write().await;
+    let channel = game.twitch.channel.clone().unwrap_or_default();
+    match (&status, &error) {
+        (_, Some(e)) => crate::logger::error("twitch", format!("#{channel}: {e}")),
+        (TwitchStatus::Connected, None) => crate::logger::info("twitch", format!("conectado a #{channel}")),
+        (s, None) => crate::logger::info("twitch", format!("#{channel}: {s:?}")),
+    }
     game.twitch.status = status;
     game.twitch.error = error;
     app.broadcast(&mut game, None);

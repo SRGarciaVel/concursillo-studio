@@ -169,7 +169,7 @@ impl PresetsDir {
             .filter_map(|id| match self.load(&id) {
                 Ok(p) => Some(p.summary()),
                 Err(e) => {
-                    eprintln!("[presets] se omite {id}.json: {e}");
+                    crate::logger::warn("presets", format!("se omite {id}.json: {e}"));
                     None
                 }
             })

@@ -25,7 +25,7 @@ Ideas para próximas versiones. No son promesas de fecha: el orden refleja el im
 - Comprobar al arrancar y avisar en el Control; **nunca** instalar en mitad de una emisión: solo cuando el streamer lo confirme.
 - Los datos del usuario (`%APPDATA%\com.concursillo.studio`) ya sobreviven a las actualizaciones: la siembra de ejemplos nunca sobrescribe.
 
-### Marcar la respuesta concreta desde el Control 🟢
+### Marcar la respuesta concreta desde el Control ✅ (botones A–D, respuesta marcada en naranja y «Revelar respuesta»)
 
 Hoy el Control tiene *Simular correcta / incorrecta*. Añadir botones **A, B, C, D** que envíen la respuesta elegida por el concursante (el motor ya lo admite con `submit_answer`), con una fase de *respuesta seleccionada* antes de revelar, para generar más tensión.
 
@@ -90,7 +90,7 @@ Hoy el comodín de la ruleta es una animación de rueda girando que cierra el pr
 - **Modo multijugador** del Rosco (dos concursantes con relojes alternos, como en el programa).
 - **Historial de partidas** y estadísticas (preguntas más falladas, tiempo medio de respuesta).
 - **Exportar sets** a TXT/CSV (el inverso del importador masivo).
-- **Atajos de teclado y Stream Deck** para el Control (acertar, fallar, pausar sin usar el ratón).
+- **Stream Deck** para el Control (los atajos de teclado ya existen: se pueden mapear a teclas del Stream Deck).
 - **Más temas** y un editor de temas con vista previa en vivo.
 
 ---

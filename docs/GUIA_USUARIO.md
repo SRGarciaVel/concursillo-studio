@@ -136,7 +136,9 @@ En el **Editor → pestaña Presets**:
 
 ### Lanzarlo
 
-En el **Control → Preset**: elige el preset, comprueba el resumen (modo, nº de preguntas, tema, tiempo) y pulsa **▶ Iniciar**. La partida queda preparada en espera; el reloj no corre hasta que cargues la primera pregunta (o pulses *Empezar rosco*).
+En el **Control → Partida → Preset**: elige el preset, comprueba el resumen (modo, nº de preguntas, tema, tiempo) y pulsa **▶ Iniciar**.
+
+¿Sin preset? Cambia a **Set de preguntas**, elige cualquier set (por ejemplo `fgc_rosco`) y pulsa **▶ Iniciar**: se juega con el tema actual y el tiempo por defecto (30 s por pregunta en Millonario, 150 s en total en el Rosco). La partida queda preparada en espera; el reloj no corre hasta que cargues la primera pregunta (o pulses *Empezar rosco*).
 
 ---
 
@@ -164,7 +166,8 @@ Notas:
 
 - Con las dos casillas marcadas, el Stage se reconecta al mostrar la escena y **recibe el estado actual al instante**: puedes cambiar de escena en mitad de una partida sin perder nada.
 - Cada tema pinta un fondo sobrio: **Default** gris mate, **Clásico** azul profundo con viñeta y **Neón** casi negro con resplandor en los bordes.
-- Activa **Fondo transparente** en la cabecera del Control para superponer el Stage sobre tu gameplay o webcam: el fondo desaparece por completo y solo quedan las cajas de cristal. Se mantiene aunque reinicies la partida.
+- La tarjeta **Conectar con OBS** del Control tiene la URL del Stage y el botón **Copiar URL**.
+- Activa **Fondo transparente** en esa misma tarjeta para superponer el Stage sobre tu gameplay o webcam: el fondo desaparece por completo y solo quedan las cajas de cristal. Se mantiene aunque reinicies la partida.
 - No necesitas recargar OBS al cambiar sonidos o temas: el Stage se actualiza solo.
 - Puedes comprobar la URL en cualquier navegador del mismo PC antes de configurarla en OBS.
 
@@ -186,7 +189,7 @@ En el **Control → Conexión a Twitch**:
 - Pulsa **Conectar**. El estado pasa a *Conectando…* y luego a **Conectado · #tu_canal**.
 - Si el canal no existe, a los ~12 s verás un error. Pulsa **Desconectar** y revisa el nombre.
 - Si usas token: debe ser de la **misma cuenta** que el usuario, con permiso de lectura de chat (`chat:read`). Puede empezar o no por `oauth:`.
-- **El token no se guarda** en ningún archivo, no se envía al Stage de OBS y no aparece en el registro del Control. Al reiniciar la app tendrás que volver a introducirlo (o usar el modo anónimo).
+- **El token no se guarda** en ningún archivo, no se envía al Stage de OBS y no aparece en el archivo de log. Al reiniciar la app tendrás que volver a introducirlo (o usar el modo anónimo).
 - Un preset con canal de Twitch se conecta **en modo anónimo** automáticamente al iniciarlo.
 
 ### Cómo votan tus espectadores
@@ -226,7 +229,8 @@ En el **Editor → pestaña Sonidos** verás los cinco efectos del sistema:
 ### Millonario
 
 1. **Cargar siguiente pregunta**: aparece en el Stage y arranca el reloj (suena la tensión).
-2. Marca la respuesta (en esta versión, los botones **Simular correcta / incorrecta** del Control).
+2. Marca la respuesta que da el concursante con los botones **A / B / C / D** del Control (la correcta lleva un ✓ que solo ves tú). En el Stage se pone **naranja y late**, sin decir aún si es correcta, y el reloj se congela. Puedes cambiarla mientras tanto.
+3. Pulsa **Revelar respuesta** (o `Enter`): se pone verde o roja con su sonido.
 3. Si acierta, **Next Round** y vuelta al paso 1. Si falla o se acaba el tiempo, la partida termina.
 
 - **⏸ Pausar reloj / ▶ Reanudar**: congela el tiempo (por ejemplo, mientras el concursante piensa en voz alta).
@@ -301,3 +305,20 @@ Hacen falta exactamente 27 letras distintas (A–Z y Ñ). El aviso bajo los cír
 
 **No puedo usar "Cambiar pregunta".**
 El set necesita preguntas de reserva: más de 15 preguntas en Millonario.
+
+## Atajos de teclado (Control)
+
+Pulsa `?` o el botón **Atajos** (abajo a la izquierda) para verlos en pantalla. No actúan mientras escribes en un campo.
+
+| Tecla | Acción |
+|---|---|
+| `1`–`4` o `A`–`D` | Marcar la respuesta del concursante (Millonario) |
+| `Enter` | Revelar la respuesta marcada |
+| `N` | Siguiente pregunta (tras acertar, también pasa de ronda) · Empezar rosco |
+| `R` / `F` / `P` | Rosco: acertó / falló / pasapalabra |
+| `Espacio` | Pausar / reanudar el reloj |
+| `Esc` | Cancelar el comodín activo o cerrar la ayuda |
+
+## Si algo falla: el archivo de log
+
+La app guarda los eventos importantes (arranque, conexiones de Twitch, órdenes rechazadas y cierres inesperados) en `%APPDATA%\com.concursillo.studio\logs\app.log`. Ábrelo con **Abrir carpeta de logs**, abajo a la derecha del Control, y adjúntalo si reportas un problema. Nunca contiene tu token de Twitch ni las preguntas de tus sets.

@@ -89,6 +89,18 @@ export function QuestionForm({ mode, editing, usedLetters, onSubmit, onCancelEdi
     ? baseValid && !!draft.roscoLetter && !taken.has(draft.roscoLetter) && (draft.withOptions ? optionsValid : draft.freeAnswer.trim() !== "")
     : baseValid && optionsValid;
 
+  // Lista legible de lo que falta, para el texto de ayuda bajo el botón.
+  const missing: string[] = [];
+  if (!draft.category.trim()) missing.push("categoría");
+  if (!draft.question.trim()) missing.push(isRosco ? "definición" : "pregunta");
+  if (isRosco && (!draft.roscoLetter || taken.has(draft.roscoLetter))) missing.push("una letra libre");
+  if (isRosco && !draft.withOptions) {
+    if (!draft.freeAnswer.trim()) missing.push("respuesta");
+  } else {
+    if (filled < 2) missing.push("al menos 2 respuestas");
+    if (!draft.answers[draft.correct]?.trim()) missing.push(`texto en la respuesta correcta (${LETTERS[draft.correct]})`);
+  }
+
   const submit = (e: FormEvent) => {
     e.preventDefault();
     if (!valid) return;
@@ -209,6 +221,11 @@ export function QuestionForm({ mode, editing, usedLetters, onSubmit, onCancelEdi
           </fieldset>
         )}
 
+        {missing.length > 0 && (draft.question.trim() !== "" || draft.category.trim() !== "" || filled > 0) && (
+          <p className="-mb-1 text-xs text-amber-300/90" role="status">
+            Para {editing ? "guardar" : "añadir"} falta: {missing.join(", ")}.
+          </p>
+        )}
         <div className="flex gap-2">
           <Button type="submit" variant="primary" size="lg" icon={editing ? Save : Plus} disabled={!valid} className="flex-1">
             {editing ? "Guardar cambios" : "Añadir al set"}

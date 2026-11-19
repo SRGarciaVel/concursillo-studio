@@ -46,3 +46,39 @@ export async function openEditor(): Promise<void> {
   ensureTauri();
   return invoke<void>("open_editor");
 }
+
+/** Abre la carpeta de logs (`%APPDATA%\com.concursillo.studio\logs`) en el Explorador. */
+export async function openLogsFolder(): Promise<void> {
+  ensureTauri();
+  return invoke<void>("open_logs_folder");
+}
+
+/** URL del Stage que el streamer añade en OBS como "Fuente de navegador". */
+export const STAGE_URL = "http://127.0.0.1:4322/stage/";
+
+/**
+ * Copia texto al portapapeles. Dentro de la app lo hace Rust (fiable aunque la
+ * ventana no tenga el foco); en un navegador normal, la API del navegador y,
+ * como último recurso, el truco clásico del textarea.
+ */
+export async function copyText(text: string): Promise<void> {
+  if (isTauri()) {
+    await invoke<void>("copy_to_clipboard", { text });
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+    return;
+  } catch {
+    // Sin permiso o sin API: plan B.
+  }
+  const area = document.createElement("textarea");
+  area.value = text;
+  area.setAttribute("readonly", "");
+  area.style.cssText = "position:fixed;opacity:0;pointer-events:none";
+  document.body.appendChild(area);
+  area.select();
+  const ok = document.execCommand("copy");
+  area.remove();
+  if (!ok) throw new Error("No se pudo copiar al portapapeles");
+}

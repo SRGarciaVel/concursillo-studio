@@ -43,7 +43,8 @@ pub enum GamePhase {
     Idle,
     /// La pregunta se está mostrando/leyendo en pantalla.
     ReadingQuestion,
-    /// El concursante está eligiendo respuesta.
+    /// Respuesta del concursante marcada pero aún sin revelar (momento de tensión).
+    /// El reloj de la pregunta se congela; se puede cambiar hasta revelar.
     Selecting,
     /// Respuesta enviada y revelada (correcta), a la espera de la siguiente ronda.
     Answering,
@@ -263,7 +264,8 @@ impl GameState {
         if self.active_comodin.is_some() {
             return self.comodin_time_remaining.is_some_and(|t| t > 0);
         }
-        self.time_remaining > 0
+        // Con la respuesta ya marcada (Selecting) el reloj de la pregunta no corre.
+        self.phase == GamePhase::ReadingQuestion && self.time_remaining > 0
     }
 
     /// Avanza el reloj `elapsed_ms` milisegundos reales. Acumula fracciones de
@@ -396,6 +398,38 @@ impl GameState {
         self.timer_paused = false;
         self.tick_accum_ms = 0;
         self.phase = GamePhase::ReadingQuestion;
+    }
+
+    /// Marca la respuesta del concursante **sin revelarla** (fase `Selecting`).
+    /// El Stage la resalta y el reloj se congela; se puede cambiar hasta `reveal_answer`.
+    pub fn select_answer(&mut self, answer_index: usize) -> Result<(), String> {
+        if self.rosco.is_some() {
+            return Err("En el rosco se usa Acertó / Falló / Pasapalabra".into());
+        }
+        if let Some(c) = self.active_comodin {
+            return Err(format!("Cierra el comodín {c:?} antes de responder"));
+        }
+        if !matches!(self.phase, GamePhase::ReadingQuestion | GamePhase::Selecting) {
+            return Err("No hay ninguna pregunta en juego".into());
+        }
+        let options = self.current_question.as_ref().map_or(0, |q| q.answers.len());
+        if answer_index >= options {
+            return Err(format!("La opción {} no existe en esta pregunta", answer_index + 1));
+        }
+        self.selected_answer = Some(answer_index);
+        self.phase = GamePhase::Selecting;
+        Ok(())
+    }
+
+    /// Revela la respuesta marcada con `select_answer`. Devuelve `true` si es correcta.
+    pub fn reveal_answer(&mut self) -> Result<bool, String> {
+        if let Some(c) = self.active_comodin {
+            return Err(format!("Cierra el comodín {c:?} antes de revelar"));
+        }
+        match (self.phase, self.selected_answer) {
+            (GamePhase::Selecting, Some(i)) => Ok(self.submit_answer(i)),
+            _ => Err("Primero marca la respuesta del concursante (A, B, C o D)".into()),
+        }
     }
 
     /// Envía una respuesta. Devuelve `true` si es correcta.
@@ -625,5 +659,26 @@ mod tests {
         assert_eq!(s.phase, GamePhase::GameOver);
         assert_eq!(s.streak, 0);
         assert!(!s.next_round());
+    }
+
+    #[test]
+    fn select_then_reveal_freezes_clock_and_allows_changing_mind() {
+        let mut s = GameState::new(GameMode::Millonario, 15);
+        s.init_with_questions(vec![q(1), q(1)]);
+        s.load_next_question().unwrap();
+        s.select_answer(0).unwrap();
+        assert_eq!((s.phase, s.selected_answer, s.is_correct), (GamePhase::Selecting, Some(0), None));
+        // Reloj congelado mientras está marcada.
+        let before = s.time_remaining;
+        assert!(!s.timer_running());
+        s.tick(5_000);
+        assert_eq!(s.time_remaining, before);
+        // Cambia de opinión y luego se revela.
+        s.select_answer(1).unwrap();
+        assert!(s.select_answer(9).is_err());
+        assert_eq!(s.reveal_answer(), Ok(true));
+        assert_eq!((s.phase, s.streak), (GamePhase::Answering, 1));
+        // Sin respuesta marcada no se puede revelar.
+        assert!(s.reveal_answer().is_err());
     }
 }

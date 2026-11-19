@@ -53,6 +53,10 @@ pub enum ClientCommand {
     /// Carga una pregunta suelta (pruebas / uso manual).
     LoadQuestion(Question),
     SubmitAnswer(usize),
+    /// Marca la respuesta del concursante sin revelarla (fase `Selecting`).
+    SelectAnswer(usize),
+    /// Revela la respuesta marcada: acierto o fallo, con su sonido.
+    RevealAnswer,
     NextRound,
     /// Reinicia la partida conservando el set cargado.
     ResetGame,
@@ -281,6 +285,11 @@ impl AppState {
                     sound = Some(answer_sound(game.phase));
                 }
             }
+            ClientCommand::SelectAnswer(i) => game.select_answer(i)?,
+            ClientCommand::RevealAnswer => {
+                game.reveal_answer()?;
+                sound = Some(answer_sound(game.phase));
+            }
             ClientCommand::NextRound => {
                 game.next_round();
             }
@@ -367,7 +376,7 @@ pub fn router(state: AppState, sounds_dir: PathBuf, stage_assets: Option<stage::
 pub async fn serve(state: AppState, sounds_dir: PathBuf, stage_assets: Option<stage::AssetLookup>) -> std::io::Result<()> {
     let addr = SocketAddr::from(([127, 0, 0, 1], SERVER_PORT));
     let listener = tokio::net::TcpListener::bind(addr).await?;
-    println!("[server] escuchando en ws://{addr}/ws · stage: http://{addr}/stage/ · sonidos: {}", sounds_dir.display());
+    crate::logger::info("server", format!("escuchando en ws://{addr}/ws · stage: http://{addr}/stage/"));
     tokio::spawn(timer::run(state.clone()));
     axum::serve(listener, router(state, sounds_dir, stage_assets)).await
 }
@@ -379,6 +388,7 @@ async fn ws_handler(ws: WebSocketUpgrade, State(state): State<AppState>) -> impl
 async fn handle_socket(socket: WebSocket, state: AppState) {
     // Suscribirse ANTES de leer el estado inicial para no perder cambios intermedios.
     let mut rx = state.tx.subscribe();
+    crate::logger::info("ws", format!("cliente conectado ({} en total)", state.tx.receiver_count()));
     let (mut sender, mut receiver) = socket.split();
 
     if sender
@@ -417,8 +427,19 @@ async fn handle_socket(socket: WebSocket, state: AppState) {
             match msg {
                 Message::Text(text) => {
                     let result = match serde_json::from_str::<ClientCommand>(&text) {
-                        Ok(cmd) => state.apply(cmd).await,
-                        Err(e) => Err(format!("comando inválido: {e}")),
+                        Ok(cmd) => {
+                            let result = state.apply(cmd).await;
+                            if let Err(e) = &result {
+                                // Solo el nombre de la acción: nunca el payload (tokens, preguntas).
+                                crate::logger::warn("ws", format!("comando «{}» rechazado: {e}", action_name(&text)));
+                            }
+                            result
+                        }
+                        Err(e) => {
+                            // El detalle de serde es para el log; al streamer, un mensaje claro.
+                            crate::logger::warn("ws", format!("comando «{}» no reconocido: {}", action_name(&text), truncate(&e.to_string(), 160)));
+                            Err(UNKNOWN_COMMAND.to_string())
+                        }
                     };
                     if let Err(e) = result {
                         let _ = direct_tx.send(ServerMessage::Error(e).to_json());
@@ -435,12 +456,39 @@ async fn handle_socket(socket: WebSocket, state: AppState) {
         _ = &mut send_task => recv_task.abort(),
         _ = &mut recv_task => send_task.abort(),
     }
+    crate::logger::info("ws", "cliente desconectado");
+}
+
+/// Mensaje para el streamer cuando llega un comando que el motor no entiende
+/// (normalmente, Control y motor de versiones distintas).
+const UNKNOWN_COMMAND: &str = "El motor no reconoce esta orden. Si acabas de actualizar, cierra y vuelve a abrir Concursillo Studio.";
+
+fn truncate(text: &str, max: usize) -> String {
+    match text.char_indices().nth(max) {
+        Some((i, _)) => format!("{}…", &text[..i]),
+        None => text.to_string(),
+    }
+}
+
+/// Nombre de la acción de un comando en crudo, para el log (sin el payload).
+fn action_name(raw: &str) -> String {
+    serde_json::from_str::<serde_json::Value>(raw)
+        .ok()
+        .and_then(|v| v.get("action").and_then(|a| a.as_str()).map(|a| a.chars().take(40).collect()))
+        .unwrap_or_else(|| "?".into())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::{game::GamePhase, schemas::GameMode};
+
+    #[test]
+    fn log_only_shows_action_name() {
+        let raw = r#"{"action":"connect_twitch","payload":{"channel":"x","token":"oauth:secreto"}}"#;
+        assert_eq!(action_name(raw), "connect_twitch");
+        assert_eq!(action_name("no es json"), "?");
+    }
 
     #[test]
     fn parses_commands() {
@@ -502,7 +550,14 @@ mod tests {
         assert!(sounds().is_empty(), "respuesta ignorada fuera de fase: sin sonido");
         app.apply(ClientCommand::NextRound).await.unwrap();
         app.apply(ClientCommand::LoadNextQuestion).await.unwrap();
-        app.apply(ClientCommand::SubmitAnswer(1)).await.unwrap();
+        // Marcar + revelar: marcar no suena ni revela; revelar suena como responder.
+        assert!(app.apply(ClientCommand::RevealAnswer).await.unwrap_err().contains("Primero marca"));
+        sounds();
+        app.apply(ClientCommand::SelectAnswer(1)).await.unwrap();
+        assert!(sounds().is_empty());
+        assert_eq!(app.game.read().await.is_correct, None);
+        app.apply(ClientCommand::RevealAnswer).await.unwrap();
+        assert_eq!(sounds(), vec![audio("play_correct")]);
         app.apply(ClientCommand::NextRound).await.unwrap();
         app.apply(ClientCommand::LoadNextQuestion).await.unwrap();
         app.apply(ClientCommand::SubmitAnswer(2)).await.unwrap();

@@ -8,6 +8,7 @@ import {
   roscoLetterOf,
   roscoSetProblems,
   saveQuestionSet,
+  useToast,
 } from "@concursillo/ui";
 import type { GameMode, Question } from "@concursillo/shared-types";
 
@@ -23,6 +24,7 @@ const letterIndex = (q: Question) => ROSCO_ALPHABET.indexOf((roscoLetterOf(q) ??
  * los comandos IPC de siempre (`save_questions_set` / `load_questions_set`).
  */
 export function useQuestionSet() {
+  const toast = useToast();
   const [mode, setMode] = useState<GameMode>("Millonario");
   const [fileName, setFileName] = useState("");
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -97,7 +99,8 @@ export function useQuestionSet() {
     save: async () => {
       try {
         await saveQuestionSet(fileName, ordered);
-        setNotice({ kind: "ok", text: `Guardado ${fileName.replace(/\.json$/, "")}.json · ${questions.length} preguntas (${MODE_LABEL[mode]})` });
+        setNotice(null);
+        toast.success(`Guardado ${fileName.replace(/\.json$/, "")}.json · ${questions.length} preguntas (${MODE_LABEL[mode]})`);
         setDirty(false);
         await refreshSets();
       } catch (e) {
@@ -106,6 +109,10 @@ export function useQuestionSet() {
     },
 
     load: async (name: string) => {
+      // No perder trabajo: avisar si hay cambios sin guardar.
+      if (dirty && questions.length > 0 && !window.confirm(`Hay cambios sin guardar en «${fileName || "el set actual"}». ¿Cargar «${name}» y descartarlos?`)) {
+        return;
+      }
       try {
         const loaded = await loadQuestionSet(name);
         const loadedMode = detectSetMode(loaded);
@@ -113,7 +120,8 @@ export function useQuestionSet() {
         setQuestions(loaded);
         setFileName(name);
         setDirty(false);
-        setNotice({ kind: "ok", text: `Cargado ${name}.json · ${loaded.length} preguntas (${MODE_LABEL[loadedMode]})` });
+        setNotice(null);
+        toast.success(`Cargado ${name}.json · ${loaded.length} preguntas (${MODE_LABEL[loadedMode]})`);
       } catch (e) {
         setNotice({ kind: "error", text: errorMessage(e) });
       }
